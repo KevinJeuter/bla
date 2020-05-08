@@ -1,0 +1,42 @@
+
+Oberklasse: Token
+
+Java: Vererbung vs. Interfaces
+
+------------------
+| Identifier     |
+------------------
+| name String    |
+------------------
+| -              |
+------------------
+
+------------------
+| Symbol         |
+------------------
+| name Enum      |
+------------------
+| -              |
+------------------
+
+
+
+
+
+b)
+<def> 
+<id:"null"> 
+<id:"xs"> 
+<symbol:eq> 
+<id:"xs"> 
+<symbol:eq> 
+<nil>
+<symbol:dot>
+<id:"null"> 
+<symbol:parenleft>
+<num:1>
+<symbol:comma>
+<nil> 
+<symbol:parenright>
+<eof>
+
