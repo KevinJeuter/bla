@@ -107,5 +107,5 @@ nochmal in die Funktion, jedoch mit dem Tail der 2. Liste. Wenn es 0 ist war es 
 übernommen, da sie nicht teilbar war.
 
 b)
-<def> <id:"null"> <id:"xs"> <eq> <id:"xs"> <eq> <nil> . <id:"null"> [1, nil]
+<def> <id:"null"> <id:"xs"> <eq> <id:"xs"> <eq> <nil> . <id:"null"> [1, nil] <eof>
 Hier war ich mir auch nicht ganz sicher, ob ich es richtig verstanden habe. 
