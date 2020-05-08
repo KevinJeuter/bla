@@ -1,0 +1,111 @@
+a)
+Hier wird eine Funktion "incr" definiert, welche einen Wert x nimmt und 1 darauf addiert. 
+Die Funktion hat den Typ num -> num, da eine Zahl eingegeben wird und eine Zahl ausgegeben wird. Hier wird also berechnet:
+def incr x = x + 1
+.
+incr 41
+x = 41 + 1
+x = 42
+Es wird also 42 ausgegeben.
+
+Die Funktion "null" die hier definiert wird, hat eine Liste "xs" als Eingabe. Diese Liste xs wird dann zu nil, 
+also zu der leeren Liste umgewandelt.
+null xs = xs = nil
+null xs where xs = 4 : 2 : nil
+Zuerst wird also xs lokal so definiert, dass es die Liste [4, 2] ist. Diese wird nun in die Funktion null eingefügt, 
+wodurch also null [4, 2] angewandt wird. Dadurch wird dann im folgenden Schritt [4, 2] = nil die Liste zu einer leeren Liste .
+
+Hier wird eine Funktion fac definiert, welche ein n einnimmt. Wenn dieses n = 0 ist, ist das Ergebnis 1 und sonst ist das 
+Ergebnis n * (fac (n - 1)) also ein rekursiver Aufruf. Es rechnet also n * (n - 1) * (n - 2) * ... bis n = 0 und somit 1 ist. 
+fac 3 wäre also: 
+3 * (fac (3 - 1))
+3 * (2 * (fac 2 - 1))
+3 * (2 * (1 * (fac 1 - 1)))
+3 * (2 * (1 * (1)))
+3 * (2 * (1))
+3 * (2)
+6
+
+one wird hier als eine Liste definiert, die [1, two] ist und two wird definiert als [2, one]. Somit sieht man schon, 
+wenn man eine der beiden Funktionen ausführt, bekommt man eine unendlich lange Liste [1, 2, 1, 2, ..] bzw [2, 1, 2, 1, 2, ...]. 
+Wenn man nun take 3 auf one anwendet, bekommt man sozusagen die unendlich große Liste [1, 2, 1, 2, 1, 2, ...] und take ist 
+definiert als:
+def take n l = if n=0 or l=nil then nil
+                               else (x:take (n-1) xs) where x  = hd l;
+                                                            xs = tl l
+Also da n=3 nicht 0 ist und l keine leere Liste, bekommen wir schonmal keine leere Liste. Wir gehen also in den else Teil:
+x:take (n-1) xs und x ist der head und xs der tail.
+1:take (2) [2, 1, 2, ...]
+1: 2:take (1) [1, 2, 1, 2....]
+1: 2: 1:take (0) [2, 1, 2, 1, ....]
+1: 2: 1: nil, also somit die Liste [1, 2, 1]
+
+Hier ist die Funktion Plus so definiert, dass sie 2 Zahlen nimmt und diese zusammen addiert.
+Wenn man hier also plus 1 eingibt, hat man nur eine Zahl als Eingabe.
+Wir bekommen hier als Ergebnis eine Funktion, nämlich:
+plus x y = x + y
+plus 1 y = 1 + y
+Wir bekommen hier also eine Funktion, die auf y 1 addiert. Somit currying.
+
+Implementation:
+
+Fibonacci:
+def fib n = if n = 0 then 0 else if n = 1 then 1 else (fib(n-1)) + (fib(n-2))
+Hier habe ich also die Funktion "fib" definiert als:
+Wenn n = 0 ist, ist das Ergebnis 0.
+Wenn n = 1 ist, ist das Ergebnis 1.
+Sonst:
+(fib(n-1)) + (fib(n-2))
+Also es nimmt sozusagen das Vorletzte Element und addiert es auf das letzte Element. Dies geht so lange bis man bei 0 und 1 angekommen 
+ist. Da weiß man das Ergebnis, nämlich 0 + 1 = 1 und von da aus wird dann alles weitergerechnet.
+
+Quick-Sort:
+def smaller xs = nil
+def equal xs = nil
+def bigger xs = nil
+
+def sort xs = if xs = nil then nil
+               else if (hd xs) > (hd (tl xs)) then append (hd (tl xs): nil) smaller
+               else if (hd xs) = (hd (tl xs)) then append (hd (tl xs): nil) equal
+               else append (hd (tl xs): nil) bigger
+               
+def qsort xs = append (append (sort smaller) equal) (sort bigger)
+
+Ich weiss, dass diese Funktion nicht funktioniert und xs nicht einmal von qsort benutzt wird. Ich wollte jedoch trotzdem teilen,
+was ich bis zum Ende hinbekommen habe, auch wenn es nicht wirklich funktioniert. Ich weiss auch nicht ob es sich hierbei wirklich
+um QuickSort handelt, jedoch war die Idee, alle kleineren Zahlen als das Pivot Element in die Liste "smaller" zu speichern, alle
+gleichen in "equal" und alle größeren in "bigger" und diese dann am schluss zu einer Liste wieder zusammenführen, nachdem es rekursiv
+aufgerufen wurde und alle somit sortiert sind.
+
+Sieve of Eratosthenes:
+def inf1 = 2 : map (plus 1) inf1
+def inf2 = 2 : map (plus 1) inf2
+def sieve = (sieveHelp inf1 inf2 0)
+
+def sieveHelp xs ys a =
+if a = 0 then
+    if (hd xs) > (hd ys) then
+        if (mod (hd xs) (hd ys)) ~= 0 then (sieveHelp xs (tl ys) 0) else (sieveHelp xs (tl ys) 1)
+    else (hd xs): (sieveHelp (tl xs) inf2 0)
+else (sieveHelp (tl xs) inf2 0)
+
+def mod x y = if x < y then x else (mod (x - y) y)
+
+Ich weiss, dass es sich hierbei nicht wirklich um einen Sieve of Eratosthenes handelt, da dieser alle zukünftigen Zahlen markiert und
+dadurch nicht in die Liste aufnimmt, während mein Code sich 2 unendliche Listen 2, 3, 4, 5, ... anschaut und somit die Primzahlen sich
+ausrechnet. Jedoch habe ich keine andere Lösung hinbekommen und diese ist zwar sehr langsam, findet jedoch trotzdem die Primzahlen.
+Ich habe zuerst 2 Listen definiert, die von 2 bis unendlich hoch rechnen. Den sieve habe ich dann so definiert, dass er die Funktion 
+"sieveHelp" aufruft und die 2 Listen und die Zahl 0 benutzt.
+Das a in sieveHelp benutze ich dafür, um herauszufinden ob die Zahl durch eine andere Zahl teilbar war oder nicht. Solange sie nicht
+teilbar ist bleibt sie auf 0, wenn sie jedoch teilbar war, wird sie auf 1 gesetzt, wodurch sie dann in den Teil des Programms
+springt, wo sie die Zahl einfach überspringt. 
+Wenn es jedoch 0 ist überprüft es die ersten 2 Zahlen der Listen ob die 1. größer als die 2. ist. Dies hab ich deswegen gemacht,
+damit es nicht alle Zahlen überprüfen muss, da eine kleinere Zahl nicht durch eine größere Restfrei teilbar ist.
+Wenn nicht, wird die Zahl in die Liste eingefügt, da sie durch nichts anderes teilbar war. Wenn doch, schaut es nach, ob sie teilbar
+durch die 1. Zahl der anderen Liste ist oder nicht durch meine mod Funktion. Wenn das Ergebnis nicht 0 ist, geht es einfach
+nochmal in die Funktion, jedoch mit dem Tail der 2. Liste. Wenn es 0 ist war es teilbar und das a wird auf 1 gesetzt.
+übernommen, da sie nicht teilbar war.
+
+b)
+<def> <id:"null"> <id:"xs"> <eq> <id:"xs"> <eq> <nil> . <id:"null"> [1, nil]
+Hier war ich mir auch nicht ganz sicher, ob ich es richtig verstanden habe. 
