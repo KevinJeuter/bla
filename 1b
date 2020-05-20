@@ -1,0 +1,9 @@
+AST von Beispiel:
+
+            ---------- Program ----------
+           |                             |
+      ---- = ----                  ---- where ----
+      |           |               |               |
+    null xs   --- = ---       --- @ ---       --- : ---
+             |         |     |         |     |         |
+          var(xs)     nil var(null)  var(1)  1        nil
