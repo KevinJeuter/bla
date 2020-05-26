@@ -1,8 +1,10 @@
 package main;
 
-import java.util.ArrayList;
 
-import main.Symbols.sym;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 
 public abstract class Lexer {
 
@@ -10,54 +12,48 @@ public abstract class Lexer {
 	private static int ptr = 0;
 
 	// store the final tokens
-	private static ArrayList<String> tokens = new ArrayList<String>();
+	private static ArrayList<Token> tokens = new ArrayList<Token>();
 
-	private static char[] symbols = { '+', '-', '*', '/', '=', '!', '<', '>', '.', '(', ')', ',', ';' }; // Vlt. nicht
-																											// optimal,
-																											// wusste
-																											// aber
-																											// nicht wie
-																											// ich sonst
-																											// an die
-																											// Zeichen
-																											// kommen
-																											// sollte.
-	// sasl program to be lexed
-	private static String src = "hallo, mein name ist kevin. def x = x+1 || hdsljsdgsdgdsfg";
+	private static String fileLocation = "C:\\Users\\kjeut\\git\\SASL-ss20-mk\\Lexer\\src\\main\\code.sasl";
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException{
+		
+		if(fileLocation == "") {
+			throw new RuntimeException("No file selected.");
+		}
+		
+		String src = fileToString(fileLocation);
 
-		for (;;) { // forever
+		for (;;) { // forever	
 
-			if (ptr > src.length()) {
-				break;
-			}
-
-			else if (ptr == src.length()) { // Mir ist keine andere Bedingung eingefallen... Gilt nur, weil nur "eof"
+			if (ptr == src.length()) { 
 				lexSpecial();
+				break;
 			}
 
-			else if (isComment()) { // Comment. Also wird rest übersprungen
-				break;
+			else if (isComment(src)) { // Comment. Also wird bis \n übersprungen, falls vorhanden
+				skipComment(src);
 			}
 
 			else if (Character.isDigit(src.charAt(ptr))) {
-				lexDigit(); // constant:num
+				lexDigit(src); // constant:num
 			}
 
 			else if (src.charAt(ptr) == '"') {
-				lexConstString(); // constant:string
-			} else if (Character.isLetter(src.charAt(ptr))) {
-				// keyword or identfier
-				lexWord();
+				lexConstString(src); // constant:string
+			} 
+			
+			else if (Character.isLetter(src.charAt(ptr))) {
+				// keyword or identfier or boolean
+				lexWord(src);
 			}
 
-			else if (src.charAt(ptr) == ' ') {
+			else if (isWhitespace(src.charAt(ptr)) || isTab(src.charAt(ptr)) || isNewLine(src.charAt(ptr))) {
 				skipWhitespace();
 			}
 
-			else if (isSymb(src.charAt(ptr))) {
-				lexSymbol();
+			else if (Symbols.isSymbol(src.charAt(ptr))) {
+				lexSymbol(src);
 			}
 
 			else {
@@ -66,22 +62,16 @@ public abstract class Lexer {
 
 		}
 
+		//System.out.print(src);
 		printTokenList();
 
 	}
-
-	private static boolean isSymb(char test) {
-
-		for (int i = 0; i < symbols.length; i++) {
-			if (symbols[i] == test) {
-				return true;
-			}
-		}
-
-		return false;
+	
+	private static String fileToString(String fileName) throws IOException {
+		return Files.readString(Path.of(fileName));
 	}
 
-	private static void lexDigit() {
+	private static void lexDigit(String file) {
 
 		// continue with lexing until NOT digit
 		// -> end pointer
@@ -89,9 +79,9 @@ public abstract class Lexer {
 
 		String token = "";
 
-		for (int i = ptr; i < src.length(); i++) {
-			if (Character.isDigit(src.charAt(ptr))) {
-				token = token + Character.toString(src.charAt(ptr));
+		for (int i = ptr; i < file.length(); i++) {
+			if (Character.isDigit(file.charAt(ptr))) {
+				token = token + Character.toString(file.charAt(ptr));
 				ptr++;
 			} else {
 				break;
@@ -100,11 +90,11 @@ public abstract class Lexer {
 
 		Constants konst = new Constants(token);
 
-		tokens.add(konst.toString());
+		tokens.add(konst);
 
 	}
 
-	private static void lexConstString() { // unsicher, da ich nicht wusste wie nachprüfen
+	private static void lexConstString(String file) { // unsicher, da ich nicht wusste wie nachprüfen
 
 		// continue with lexing until '"'
 		// -> end pointer
@@ -112,22 +102,30 @@ public abstract class Lexer {
 
 		String token = "";
 
-		for (int i = ptr; i < src.length(); i++) {
-			if (src.charAt(ptr) != '"') {
-				token = token + Character.toString(src.charAt(ptr));
-				ptr++;
+
+		ptr++;
+		for (int i = ptr; i < file.length(); i++) {
+			if (file.charAt(ptr) != '"') {
+				if(ptr == file.length() - 1 && file.charAt(ptr) != '"') {
+					throw new RuntimeException("not a valid string");
+				}
+				else {
+					token = token + Character.toString(file.charAt(ptr));
+					ptr++;
+				}
 			} else {
+				ptr++;
 				break;
 			}
 		}
 
 		Constants konst = new Constants(token);
 
-		tokens.add(konst.toString());
+		tokens.add(konst);
 
 	}
 
-	private static void lexWord() {
+	private static void lexWord(String file) {
 
 		// continue with lexing until NOT word
 		// -> end pointer
@@ -136,38 +134,35 @@ public abstract class Lexer {
 
 		String token = "";
 
-		for (int i = ptr; i < src.length(); i++) {
-			if (Character.isLetter(src.charAt(ptr))) {
-				token = token + Character.toString(src.charAt(ptr));
+		for (int i = ptr; i < file.length(); i++) {
+			if (Character.isLetter(file.charAt(ptr))) {
+				token = token + Character.toString(file.charAt(ptr));
 				ptr++;
 			} else {
 				break;
 			}
 		}
-
-		int notKW = 0;
-		for (Keywords.kw k : Keywords.kw.values()) {
-			if (k.toString().toLowerCase().equals(token.toLowerCase()) || token.toLowerCase().equals("def")) {
-
-				Keywords key = new Keywords(token);
-
-				tokens.add(key.toString());
-				notKW = 0;
-				break;
-			} else {
-				notKW = 1;
-			}
-		}
-
-		if (notKW == 1) {
+		
+		if (Keywords.isKeyword(token)) {
+			Keywords key = new Keywords(token);
+			
+			tokens.add(key);
+			} 
+		
+		else if(Constants.isBool(token)){
+			Constants konst = new Constants(token);
+			
+			tokens.add(konst);
+			} 
+		
+		else {
 			Identifier id = new Identifier(token);
 
-			tokens.add(id.toString());
-		}
-
+			tokens.add(id);
+			}
 	}
 
-	private static void lexSymbol() {
+	private static void lexSymbol(String file) {
 
 		// continue with lexing until NOT symbol
 		// -> end pointer
@@ -175,9 +170,9 @@ public abstract class Lexer {
 
 		String token = "";
 
-		for (int i = ptr; i < src.length(); i++) {
-			if (isSymb(src.charAt(ptr))) {
-				token = token + Character.toString(src.charAt(ptr));
+		for (int i = ptr; i < file.length(); i++) {
+			if (Symbols.isSymbol(file.charAt(ptr))) {
+				token = token + Character.toString(file.charAt(ptr));
 				ptr++;
 			} else {
 				break;
@@ -185,24 +180,24 @@ public abstract class Lexer {
 		}
 
 		switch (token) { // vielleicht auch nicht die beste lösung
-		case "+":
-		case "-":
-		case "*":
-		case "/":
-		case "<=":
-		case "=":
-		case "!=":
-		case ">=":
-		case "<":
-		case ">":
-		case ".":
-		case ",":
-		case "(":
-		case ")":
-		case ";":
+		case Symbols.plus:
+		case Symbols.minus:
+		case Symbols.mul:
+		case Symbols.div:
+		case Symbols.leq:
+		case Symbols.equ:
+		case Symbols.neq:
+		case Symbols.geq:
+		case Symbols.les:
+		case Symbols.grt:
+		case Symbols.dot:
+		case Symbols.comma:
+		case Symbols.parenl:
+		case Symbols.parenr:
+		case Symbols.semicolon:
 			Symbols symbol = new Symbols(token);
 
-			tokens.add(symbol.toString());
+			tokens.add(symbol);
 			break;
 		}
 	}
@@ -211,22 +206,45 @@ public abstract class Lexer {
 
 		Specials spec = new Specials("eof");
 
-		tokens.add(spec.toString());
+		tokens.add(spec);
 
 		ptr++;
 
 	}
-
+	
 	private static void skipWhitespace() {
 		ptr++;
 	}
+
+	private static boolean isWhitespace(char test) {
+		return test == ' ';
+	}
 	
-	private static boolean isComment() {
-		return (ptr < src.length() && src.charAt(ptr) == '|' && src.charAt(ptr + 1) == '|');
+	private static boolean isTab(char test) {
+		return test == '\t';
+	}
+	
+	private static boolean isNewLine(char test) {
+		return test == '\n';
+	}
+	
+	private static boolean isComment(String file) {
+		return (ptr < file.length() && file.charAt(ptr) == '|' && file.charAt(ptr + 1) == '|');
+	}
+	
+	private static void skipComment(String file) {
+		for(int i = ptr; i < file.length(); i++) {
+			if(!isNewLine(file.charAt(ptr))) {
+				ptr++;
+			}
+			else {
+				break;
+			}
+		}
 	}
 
-	private static void printTokenList() {
-		for (String i : tokens) {
+	private static void printTokenList() { 	//toString
+		for (Token i : tokens) {
 			System.out.println(i);
 		}
 	}

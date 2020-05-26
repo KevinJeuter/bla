@@ -8,8 +8,36 @@ public class Constants extends Token {
 		konst = strKonst;
 	}
 	
-	public int getNum() {
+	private boolean isNum() {
 		if(konst.matches("-?\\d+")) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isString() {
+		if(!(konst.matches("-?\\d+")) && ((konst.toLowerCase() != "true") || (konst.toLowerCase() == "false"))) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isBool() {
+		if(konst.equalsIgnoreCase("true") || konst.equalsIgnoreCase("false")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean isBool(String test) {
+		if(test.equalsIgnoreCase("true") || test.equalsIgnoreCase("false")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public int getNum() {
+		if(isNum()) {
 			return Integer.parseInt(konst);
 		}
 		else {
@@ -18,7 +46,7 @@ public class Constants extends Token {
 	}
 	
 	public boolean getBool() {
-		if(konst.toLowerCase() == "true" || konst.toLowerCase() == "false") {
+		if(isBool()) {
 			return Boolean.parseBoolean(konst);
 		}
 		else {
@@ -27,7 +55,7 @@ public class Constants extends Token {
 	}
 	
 	public String getString() {
-		if(!(konst.matches("-?\\d+")) && ((konst.toLowerCase() != "true") || (konst.toLowerCase() == "false"))){
+		if(isString()){
 			return konst;
 		}
 		else {
@@ -37,15 +65,18 @@ public class Constants extends Token {
 	
 	@Override
 	public String toString() {
-		if(konst.matches("-?\\d+")) {
+		if(isNum()) {
 			return "<Constant num: " + this.konst.toString() + ">";
 		}
-		else if(konst.toLowerCase() == "true" || konst.toLowerCase() == "false") {
+		else if(isBool()) {
 			return "<Constant boolean: " + this.konst.toString() + ">";
 		}
-		else {
+		else if(isString()){
 			return "<Constant string: \"" + this.konst.toString() + "\">";
 		}	
+		else {
+			throw new RuntimeException("not a constant");
+		}
 	}
 
 }
