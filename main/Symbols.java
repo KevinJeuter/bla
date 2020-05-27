@@ -10,10 +10,11 @@ public class Symbols extends Token {
 	public static final String div = "/";
 	public static final String leq = "<=";
 	public static final String equ = "=";
-	public static final String neq = "!=";
+	public static final String neq = "~=";
 	public static final String geq = ">=";
 	public static final String les = "<";
 	public static final String grt = ">";
+	public static final String not = "~";
 	public static final String dot = ".";
 	public static final String comma = ",";
 	public static final String parenl = "(";
@@ -46,7 +47,8 @@ public class Symbols extends Token {
 	public static boolean isSymbol(char test) {
 		if(test == plus.charAt(0) || test == minus.charAt(0) || test == mul.charAt(0) || test == div.charAt(0)
 		   || test == equ.charAt(0) || test == les.charAt(0) || test == grt.charAt(0) || test == dot.charAt(0) 
-		   || test == comma.charAt(0) || test == parenl.charAt(0) || test == parenr.charAt(0) || test == semicolon.charAt(0)) {
+		   || test == comma.charAt(0) || test == parenl.charAt(0) || test == parenr.charAt(0) || test == semicolon.charAt(0)
+		   || test == not.charAt(0)) {
 			return true;
 		}
 		return false;

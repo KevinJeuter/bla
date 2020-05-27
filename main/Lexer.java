@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 public abstract class Lexer {
+	
+	//BUG: Wenn es kein Comment gibt, gibt es einen Fehler, wenn eine neue Zeile begonnen wird.
 
 	// point to current character
 	private static int ptr = 0;
@@ -14,15 +16,9 @@ public abstract class Lexer {
 	// store the final tokens
 	private static ArrayList<Token> tokens = new ArrayList<Token>();
 
-	private static String fileLocation = "C:\\Users\\kjeut\\git\\SASL-ss20-mk\\Lexer\\src\\main\\code.sasl";
-
 	public static void main(String[] args) throws IOException{
 		
-		if(fileLocation == "") {
-			throw new RuntimeException("No file selected.");
-		}
-		
-		String src = fileToString(fileLocation);
+		String src = fileToString(args[0]);
 
 		for (;;) { // forever	
 
@@ -33,6 +29,10 @@ public abstract class Lexer {
 
 			else if (isComment(src)) { // Comment. Also wird bis \n übersprungen, falls vorhanden
 				skipComment(src);
+			}
+
+			else if (isWhitespace(src.charAt(ptr)) || isTab(src.charAt(ptr)) || isNewLine(src.charAt(ptr))) {
+				skipWhitespace();
 			}
 
 			else if (Character.isDigit(src.charAt(ptr))) {
@@ -48,10 +48,6 @@ public abstract class Lexer {
 				lexWord(src);
 			}
 
-			else if (isWhitespace(src.charAt(ptr)) || isTab(src.charAt(ptr)) || isNewLine(src.charAt(ptr))) {
-				skipWhitespace();
-			}
-
 			else if (Symbols.isSymbol(src.charAt(ptr))) {
 				lexSymbol(src);
 			}
@@ -64,7 +60,7 @@ public abstract class Lexer {
 
 		//System.out.print(src);
 		printTokenList();
-
+		
 	}
 	
 	private static String fileToString(String fileName) throws IOException {
@@ -169,37 +165,24 @@ public abstract class Lexer {
 		// create token and insert in result
 
 		String token = "";
-
-		for (int i = ptr; i < file.length(); i++) {
-			if (Symbols.isSymbol(file.charAt(ptr))) {
-				token = token + Character.toString(file.charAt(ptr));
-				ptr++;
-			} else {
-				break;
+	
+			for (int i = ptr; i < file.length(); i++) {
+				if (Symbols.isSymbol(file.charAt(ptr))) {
+					token = token + Character.toString(file.charAt(ptr));
+					ptr++;
+					if(!token.equals(Symbols.les) && !token.equals(Symbols.grt) && !token.equals(Symbols.not)) {	//Wenn es nicht mit <, >, ! anfängt, haben alle anderen Symbole nur Länge 1. Um z.b. x=(x+2) zu ermöglichen =( wäre kein Symbol sonst.
+						break;
+					}
+				} else {
+					break;
+				}
 			}
-		}
 
-		switch (token) { // vielleicht auch nicht die beste lösung
-		case Symbols.plus:
-		case Symbols.minus:
-		case Symbols.mul:
-		case Symbols.div:
-		case Symbols.leq:
-		case Symbols.equ:
-		case Symbols.neq:
-		case Symbols.geq:
-		case Symbols.les:
-		case Symbols.grt:
-		case Symbols.dot:
-		case Symbols.comma:
-		case Symbols.parenl:
-		case Symbols.parenr:
-		case Symbols.semicolon:
-			Symbols symbol = new Symbols(token);
+		
+		Symbols symbol = new Symbols(token);
 
-			tokens.add(symbol);
-			break;
-		}
+		tokens.add(symbol);
+		
 	}
 
 	private static void lexSpecial() {

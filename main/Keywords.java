@@ -10,7 +10,9 @@ public class Keywords extends Token {
 		THEN,
 		ELSE,
 		WHERE,
-		NOT
+		NOT,
+		AND,
+		OR
 	}
 	
 	public Keywords(String strKey) {
@@ -34,7 +36,6 @@ public class Keywords extends Token {
 	private kw toEnum(String strKey) {
 		switch(strKey.toLowerCase()) {
 		case "def":
-		case "define":
 			return kw.DEF;
 		case "if":
 			return kw.IF;
@@ -46,6 +47,10 @@ public class Keywords extends Token {
 			return kw.WHERE;
 		case "not":
 			return kw.NOT;
+		case "and":
+			return kw.AND;
+		case "or":
+			return kw.OR;
 		default:
 			// error: unknown keyword
 			throw new RuntimeException("unknown symbol");	
