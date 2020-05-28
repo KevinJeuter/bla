@@ -1,0 +1,34 @@
+	
+	//Habe es nicht richtig verstanden. Bei meinem public Node condExpr wären die Lexer.getToken() alle noch
+	//keine Nodes. Auch ob ich das match richtig verstanden habe, weiss ich nicht. Und es gibt ja mehrere tokens
+	//zwischen if then und then else. Das müsste man dann für das @ auch noch anders machen.
+
+	public void condExpr() {
+		if(Lexer.getLookahead == Keywords.kw.IF) {
+			Parser.match(Keywords.kw.IF);
+			Lexer.getToken();
+			Parser.match(Keywords.kw.THEN);
+			Lexer.getToken();
+			Parser.match(Keywords.kw.ELSE);
+			Lexer.getToken();
+		}
+		else {
+			Lexer.getToken();
+		}
+	}
+	
+	public Node condExpr() {
+		if(Lexer.getLookahead == Keywords.kw.IF) {
+			Parser.match(Keywords.kw.IF);
+			At ifAt = new At(Builtin.funct.COND, Lexer.getToken()); 
+			Parser.match(Keywords.kw.THEN);
+			At thenAt = new At(ifAt, Lexer.getToken());
+			Parser.match(Keywords.kw.ELSE);
+			At elseAt = new At(thenAt, Lexer.getToken());
+			return elseAt;
+		}
+		else {
+			Lexer.getToken();
+		}
+	}
+}
