@@ -1,6 +1,6 @@
 package main;
 
-public class StringConst extends Const{
+public class StringConst extends Node{
 	private String konst;
 	
 	public StringConst(String konst) {

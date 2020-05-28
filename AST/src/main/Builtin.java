@@ -15,12 +15,12 @@ public class Builtin extends Node{
 		GEQ,
 		LES,
 		GRT,
-		COND
+		COND,
+		COLON
 	}
 	
 	public Builtin(funct function) {
 		this.function = function;
 	}
-
 
 }

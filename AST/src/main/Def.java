@@ -15,7 +15,7 @@ public class Def extends Node{
 	//wäre dann z.B. ("xs", 1) ("ys", 2) usw und ich benutze dann immer nur die keys für die liste.
 	
 	private Node right;
-	private HashMap<String, Pair<ArrayList<String>, Node>> left = new HashMap<String, Pair<ArrayList<String>, Node>>();
+	private HashMap<String, Pair<ArrayList<String>, Node>> left;
 
 	public Def(HashMap<String, Pair<ArrayList<String>, Node>> left, Node right) {
 		this.left = left;

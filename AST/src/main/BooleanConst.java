@@ -1,6 +1,6 @@
 package main;
 
-public class BooleanConst extends Const{
+public class BooleanConst extends Node{
 	private boolean bool;
 	
 	public BooleanConst(boolean bool) {

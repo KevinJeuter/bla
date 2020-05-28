@@ -1,6 +1,6 @@
 package main;
 
-public class NumberConst extends Const {
+public class NumberConst extends Node{
 	private int konst;
 	
 	public NumberConst(int konst) {
