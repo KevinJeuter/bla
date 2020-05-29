@@ -20,6 +20,7 @@ public class Symbols extends Token {
 	public static final String parenl = "(";
 	public static final String parenr = ")";
 	public static final String semicolon = ";";
+	public static final String colon = ":";
 
 	enum sym {
 		PLUS,
@@ -36,7 +37,8 @@ public class Symbols extends Token {
 		COMMA,
 		PARENL,
 		PARENR,
-		SEMICOLON
+		SEMICOLON,
+		COLON
 	}
 	
 	public Symbols(String strSymbol) {
@@ -48,7 +50,7 @@ public class Symbols extends Token {
 		if(test == plus.charAt(0) || test == minus.charAt(0) || test == mul.charAt(0) || test == div.charAt(0)
 		   || test == equ.charAt(0) || test == les.charAt(0) || test == grt.charAt(0) || test == dot.charAt(0) 
 		   || test == comma.charAt(0) || test == parenl.charAt(0) || test == parenr.charAt(0) || test == semicolon.charAt(0)
-		   || test == not.charAt(0)) {
+		   || test == not.charAt(0) || test == colon.charAt(0)) {
 			return true;
 		}
 		return false;
@@ -91,6 +93,8 @@ public class Symbols extends Token {
 			return sym.PARENR;
 		case semicolon:
 			return sym.SEMICOLON;
+		case colon:
+			return sym.COLON;
 		default:
 			// error: unknown keyword
 			throw new RuntimeException("unknown symbol");
