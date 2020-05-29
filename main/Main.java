@@ -216,9 +216,12 @@ public abstract class Main {
 		String newLine = "";
 		
 		for (int i = ptr; i < test.length(); i++) {
-			if (test.charAt(ptr) == '\n' || test.charAt(ptr) == '\r') {
-				newLine = newLine + Character.toString(test.charAt(ptr));
-				ptr++;
+			if (test.charAt(i) == '\n' || test.charAt(i) == '\r') {
+				newLine = newLine + Character.toString(test.charAt(i));
+				i++;
+				if (test.charAt(i) == '\r') {
+					newLine = newLine + Character.toString(test.charAt(i++));
+				}
 			} else {
 				break;
 			}
