@@ -1,0 +1,27 @@
+<project>
+	<property name="test.build.dir" value="build/test"/>
+	<property name="test.src.dir" value="src/test"/>
+
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <target name="compile" depends="clean">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src" destdir="build/classes"/>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/sasl.jar" basedir="build/classes">
+            <manifest>
+                <attribute name="Main-Class" value="lexer.Main"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="build/jar/sasl.jar" fork="true"/>
+    </target>
+	
+</project>
