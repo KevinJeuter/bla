@@ -15,8 +15,6 @@ public abstract class Main {
 
 	// store the final tokens
 	private static ArrayList<Token> tokens = new ArrayList<Token>();
-	
-	private static String[] tokensString = new String[tokens.size()];
 
 	public static void main(String[] args) throws IOException{
 		
