@@ -22,10 +22,6 @@ import lexer.Lexer;
 
 public class Parser {
 	
-	//Habe es nicht richtig verstanden. Bei meinem public Node condExpr wären die Lexer.getToken() alle noch
-	//keine Nodes. Auch ob ich das match richtig verstanden habe, weiss ich nicht. Und es gibt ja mehrere tokens
-	//zwischen if then und then else. Das müsste man dann für das @ auch noch anders machen.
-	
 	private static Lexer l = new Lexer(lexer.Main.getTokens());
 	//nicht 2 mal expr(), wenn dann mit variable
 	
