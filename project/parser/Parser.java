@@ -330,6 +330,10 @@ public class Parser {
 		
 	}
 	
+	private static Boolean prefixop() {
+		
+	}
+	
 	private static Node addop() {
 		
 	}
@@ -339,27 +343,7 @@ public class Parser {
 	}
 	
 	private static Node relop() {
-		if(l.getLookahead().toString().equals(tokenEqu.toString())) {
-			return nodeEqu;
-		}
-		else if(l.getLookahead().toString().equals(tokenNeq.toString())) {
-			return nodeNeq;
-		}
-		else if(l.getLookahead().toString().equals(tokenLes.toString())) {
-			return nodeLes;
-		}
-		else if(l.getLookahead().toString().equals(tokenGrt.toString())) {
-			return nodeGrt;
-		}
-		else if(l.getLookahead().toString().equals(tokenLeq.toString())) {
-			return nodeLeq;
-		}
-		else if (l.getLookahead().toString().equals(tokenGeq.toString())) {
-			return nodeGeq;
-		}
-		else {
-			throw new RuntimeException("not a relop");
-		}
+
 	}
 	
 	private static Node id() {
