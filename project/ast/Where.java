@@ -8,10 +8,7 @@ import visitors.Visitor;
 public class Where extends Node{
 	
 	private Node right;
-	//muss hier �berhaupt eine hashmap mit string? weil die parameter von where sind bei uns im bsp. links im at knoten
-	//private Pair<ArrayList<String>, Node> left;
-	
-	// gefixt:
+
 	private HashMap<String, Pair<ArrayList<String>, Node>> left;
 
 	public Where(HashMap<String, Pair<ArrayList<String>, Node>> left, Node right) {

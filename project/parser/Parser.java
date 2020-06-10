@@ -37,11 +37,27 @@ public class Parser {
 	private static Keywords elseKey = new Keywords("else");
 	private static Keywords tokenOr = new Keywords("or");
 	private static Keywords tokenAnd = new Keywords("and");
+	private static Keywords def = new Keywords("def");
+	private static Symbols tokenEqu = new Symbols("=");
+	private static Symbols tokenNeq = new Symbols("!=");
+	private static Symbols tokenGeq = new Symbols(">=");
+	private static Symbols tokenLeq = new Symbols("<=");
+	private static Symbols tokenGrt = new Symbols(">");
+	private static Symbols tokenLes = new Symbols("<");
 	private static Symbols tokenColon = new Symbols(":");
+	private static Symbols tokenSemicolon = new Symbols(";");
+	private static Symbols dot = new Symbols(".");
 	private static Symbols tokenPlus = new Symbols("+");
 	private static Symbols tokenMinus = new Symbols("-");
 	private static Symbols tokenParenl = new Symbols("(");
 	private static Symbols tokenParenr = new Symbols(")");
+
+	private static Node nodeEqu = new Builtin(Builtin.funct.EQU);
+	private static Node nodeNeq = new Builtin(Builtin.funct.NEQ);
+	private static Node nodeLeq = new Builtin(Builtin.funct.LEQ);
+	private static Node nodeGeq = new Builtin(Builtin.funct.GEQ);
+	private static Node nodeLes = new Builtin(Builtin.funct.LES);
+	private static Node nodeGrt = new Builtin(Builtin.funct.GRT);
 	private static Node nodeOr = new Builtin(Builtin.funct.OR);
 	private static Node nodeAnd = new Builtin(Builtin.funct.AND);
 	private static Node nodeCond = new Builtin(Builtin.funct.COND);
@@ -52,6 +68,53 @@ public class Parser {
 	private static Node nodeTl = new Builtin(Builtin.funct.TL);
 	private static Node nodeNil = new Builtin(Builtin.funct.NIL);
 	private static Node empty = new StringConst("");
+	
+	public static Node system() {
+		if(l.getLookahead().toString().equals(def.toString())) {
+			
+		}
+		else {
+			return expr();
+		}
+	}
+	
+	public static Node funcdefs() {
+		match(def);
+		
+	}
+	
+	public static Node defs() {
+		At defsAt = new At(def(), defs1());
+		return defsAt;
+	}
+	
+	public static Node defs1() {
+		if(l.getLookahead().toString().equals(tokenSemicolon.toString())) {
+			match(tokenSemicolon);
+			At defs1At = new At(def(), defs1());
+			return defs1At;
+		}
+		else {
+			return empty;
+		}
+	}
+	
+	public static Node def() {
+		At defAt = new At(name(), abstraction());
+		return defAt;
+	}
+	
+	public static Node abstraction() {
+		if(l.getLookahead().toString().equals(tokenEqu.toString())) {
+			match(tokenEqu);
+			At abstractionAt = new At(nodeEqu, expr());
+			return abstractionAt;
+		}
+		else {
+			At abstrElseAt = new At(name(), abstraction());
+			return abstrElseAt;
+		}
+	}
 	
 	public static Node condExpr() {
 		if(l.getLookahead().toString().equals(ifKey.toString())) {
@@ -280,7 +343,27 @@ public class Parser {
 	}
 	
 	private static Node relop() {
-		
+		if(l.getLookahead().toString().equals(tokenEqu.toString())) {
+			return nodeEqu;
+		}
+		else if(l.getLookahead().toString().equals(tokenNeq.toString())) {
+			return nodeNeq;
+		}
+		else if(l.getLookahead().toString().equals(tokenLes.toString())) {
+			return nodeLes;
+		}
+		else if(l.getLookahead().toString().equals(tokenGrt.toString())) {
+			return nodeGrt;
+		}
+		else if(l.getLookahead().toString().equals(tokenLeq.toString())) {
+			return nodeLeq;
+		}
+		else if (l.getLookahead().toString().equals(tokenGeq.toString())) {
+			return nodeGeq;
+		}
+		else {
+			throw new RuntimeException("not a relop");
+		}
 	}
 	
 	private static Node id() {

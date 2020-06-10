@@ -18,7 +18,12 @@ public class Builtin extends Node{
 		LES,
 		GRT,
 		COND,
-		COLON
+		COLON,
+		AND,
+		OR,
+		HD,
+		TL,
+		NIL
 	}
 	
 	public Builtin(funct function) {

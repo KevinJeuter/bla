@@ -14,7 +14,7 @@ public class Pair<F, S> {
     }
 
     /**
-     * ï¿½berprï¿½ft, ob 2 Paare gleich sind oder nicht.
+     * Überprüft, ob 2 Paare gleich sind oder nicht.
      */
     @Override
     public boolean equals(Object o) {
