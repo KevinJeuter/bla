@@ -78,10 +78,12 @@ public class Parser {
 	private static Node nodeMul = new Builtin(Builtin.funct.MUL);
 	private static Node nodeDiv = new Builtin(Builtin.funct.DIV);
 	
+	//Funktion zum überprüfen, ob Token_test gleich nächstes Token im Stream ist
 	private boolean equalLookAhead(Token test) {
 		return l.getLookahead().toString().equals(test.toString());
 	}
 	
+	//Überprüfen, ob Token gleich und ein Token weiter gehen im Stream
 	private Token match(Token t) {
 		Token x = l.getToken();
 		if (x.toString().equals(t.toString())) {
@@ -94,29 +96,34 @@ public class Parser {
 	
 	public Def system() {
 		HashMap<String, Pair<ArrayList<String>, Node>> funcdefs = new HashMap<String, Pair<ArrayList<String>, Node>>();
-	/*	if(equalLookAhead(def)) {
+		//Wenn nächstes Token = Token_Def, mache neues Def aus funcdefs und expr
+		if(equalLookAhead(def)) {
 			funcdefs = funcdefs().returnHashMap();
 			match(dot);
 			Node expr = expr();
 			Def system = new Def(funcdefs, expr);
 			return system;
 		}
-		else {*/
+		//Wenn nächstes token != Token_Def mache neues Def aus empty und expr
+		else {
 			ArrayList<String> emptyList = new ArrayList<String>();
-			emptyList.add("");
-			Pair<ArrayList<String>, Node> emptyPair = new Pair<ArrayList<String>, Node>(emptyList, null);
-			funcdefs.put("", emptyPair);
+			emptyList.add("empty");
+			StringConst emptyNode = new StringConst("empty");
+			Pair<ArrayList<String>, Node> emptyPair = new Pair<ArrayList<String>, Node>(emptyList, emptyNode);
+			funcdefs.put("empty", emptyPair);
 			Def expr = new Def(funcdefs, expr());
 			return expr;
-		//}
+		}
 	}
-	/*
+	
 	private DefHashMap funcdefs() {
+		//Neue Hashmap für Def 
 		DefHashMap f = new DefHashMap();
 		return funcdefs1(f);
 	}
 	
 	private DefHashMap funcdefs1(DefHashMap f) {
+		//Fülle Hashmap mit def und gebe die Hashmap durch funcdefs1(f) aus
 		if(equalLookAhead(def)) {
 			match(def);
 			def(f);
@@ -128,25 +135,30 @@ public class Parser {
 	}
 	
 	private DefHashMap def(DefHashMap f) {
+		//Fülle Hashmap.
 		f.put(name().toString(), abstraction());
 		return f;
 	}
 	
+	//Array var, um die Variablen zu speichern
 	private ArrayList<String> var = new ArrayList<String>();
 	
 	private Pair<ArrayList<String>, Node> abstraction() {
 		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
+			//Wenn ein =, dann gib das Pair von Variablen und expr aus
 			Pair<ArrayList<String>, Node> abst = new Pair<ArrayList<String>, Node>(var, expr());
+			//Leere die Liste, für das nächste mal, wenn die Funktion aufgerufen wird
 			var.clear();
 			return abst;
 		}
 		else {
+			//Füge die variablen zur liste var hinzu
 			var.add(name().toString());
 			return abstraction();
 		}	
 	}
-	*/
+	
 	private Node condExpr() {
 		if(equalLookAhead(ifKey)) {
 			match(ifKey);
@@ -165,6 +177,7 @@ public class Parser {
 	//bei listen braucht man parameter
 	
 	private Node expr() {
+		//Wenn expr1 null ist, dann gib nur condExpr() aus, sonst mache ein At mit condExpr und expr
 		if(expr1() == null) {
 			return condExpr();
 		}
@@ -175,12 +188,19 @@ public class Parser {
 	}
 	
 	private Node expr1() {
+		//gib null aus, rest nicht implementiert
 		return null;
 	}
 
 	private Node listExpr() {
-		At listExprAt = new At(opExpr(), listExpr1());
-		return listExprAt;
+		Node opEx = opExpr();
+		if(listExpr1() == null) {
+			return opEx;
+		}
+		else {
+			At listExprAt = new At(opEx, listExpr1());
+			return listExprAt;
+		}
 	}
 	
 	private Node listExpr1() {
@@ -190,8 +210,7 @@ public class Parser {
 			return listExpr1At;
 		}
 		else {
-			At endListAt = new At(nodeColon, nodeNil);
-			return endListAt;
+			return null;
 		}
 	}
 	
@@ -209,7 +228,8 @@ public class Parser {
 	private Node opExpr1() {
 		if(equalLookAhead(tokenOr)) {
 			match(tokenOr);
-			At opExpr1AtOr = new At(nodeOr, conjunct());
+			Node con = conjunct();
+			At opExpr1AtOr = new At(nodeOr, con);
 			if(opExpr1() == null) {
 				return opExpr1AtOr;
 			}
@@ -226,10 +246,10 @@ public class Parser {
 	private Node conjunct() {
 		Node com = compar();
 		if(conjunct1() == null) {
-			return compar();
+			return com;
 		}
 		else {
-			At conjunctAt = new At(compar(), conjunct1());
+			At conjunctAt = new At(com, conjunct1());
 			return conjunctAt;
 		}
 	}
@@ -237,7 +257,8 @@ public class Parser {
 	private Node conjunct1() {
 		if(equalLookAhead(tokenAnd)) {
 			match(tokenAnd);
-			At conjunct1AtAnd = new At(nodeAnd, compar());
+			Node com = compar();
+			At conjunct1AtAnd = new At(nodeAnd, com);
 			if(conjunct1() == null) {
 				return conjunct1AtAnd;
 			}
@@ -261,31 +282,23 @@ public class Parser {
 		}
 	}
 	
-	private Token relopToken;
-	
 	private boolean isRelopToken() {
 		if(equalLookAhead(tokenEqu)) {
-			relopToken = tokenEqu;
 			return true;
 		}
 		else if(equalLookAhead(tokenNeq)) {
-			relopToken = tokenNeq;
 			return true;
 		}
 		else if(equalLookAhead(tokenLes)) {
-			relopToken = tokenLes;
 			return true;
 		}
 		else if(equalLookAhead(tokenGrt)) {
-			relopToken = tokenGrt;
 			return true;
 		}
 		else if(equalLookAhead(tokenLeq)) {
-			relopToken = tokenLeq;
 			return true;
 		}
 		else if(equalLookAhead(tokenGeq)) {
-			relopToken = tokenGeq;
 			return true;
 		}
 		else {
@@ -296,7 +309,6 @@ public class Parser {
 	private Node compar1() {
 		if(isRelopToken()) {
 			Node relopNode = relop();
-			match(relopToken);
 			At compar1RelopAt = new At(relopNode, add());
 			At compar1At = new At(compar1RelopAt, compar1());
 			return compar1At;
@@ -311,15 +323,11 @@ public class Parser {
 		return addAt;
 	}
 	
-	private Token addopToken;
-	
 	private boolean isAddopToken() {
 		if(equalLookAhead(tokenPlus)) {
-			addopToken = tokenPlus;
 			return true;
 		}
 		else if(equalLookAhead(tokenMinus)) {
-			addopToken = tokenMinus;
 			return true;
 		}
 		else {
@@ -330,7 +338,6 @@ public class Parser {
 	private Node add1() {
 		if(isAddopToken()) {
 			Node addopNode = addop();
-			match(addopToken);	//hier muss token von addop
 			At add1AddopAt = new At(addopNode, mul());
 			At add1At = new At(add1AddopAt, add1());
 			return add1At;
@@ -345,15 +352,11 @@ public class Parser {
 		return mulAt;
 	}
 	
-	private Token mulopToken;
-	
 	private boolean isMulopToken() {
 		if(equalLookAhead(tokenMul)) {
-			mulopToken = tokenMul;
 			return true;
 		}
 		else if(equalLookAhead(tokenDiv)) {
-			mulopToken = tokenDiv;
 			return true;
 		}
 		else {
@@ -364,7 +367,6 @@ public class Parser {
 	private Node mul1() {
 		if(isMulopToken()) {
 			Node mulopNode = mulop();
-			match(mulopToken); //hier muss token von mulop
 			At mul1MulopAt = new At(mulopNode, factor());
 			At mul1At = new At(mul1MulopAt, mul1());
 			return mul1At;
@@ -373,20 +375,15 @@ public class Parser {
 			return null;
 		}
 	}
-	
-	private Token prefixToken;
-	
+
 	private boolean isPrefixToken() {
 		if(equalLookAhead(tokenMinus)) {
-			prefixToken = tokenMinus;
 			return true;
 		}
 		else if(equalLookAhead(tokenPlus)) {
-			prefixToken = tokenPlus;
 			return true;
 		}
 		else if(equalLookAhead(tokenNot)) {
-			prefixToken = tokenNot;
 			return true;
 		}
 		else {
@@ -397,7 +394,6 @@ public class Parser {
 	private Node factor() {
 		if(isPrefixToken()) {
 			Node prefixNode = prefix();
-			match(prefixToken);
 			At factorAt = new At(prefixNode, comb());
 			return factorAt;
 		}
@@ -429,11 +425,12 @@ public class Parser {
 	
 	private Node comb1() {
 		if(isIdClass() || isHdOrTl() || isConstantClass() || isParenl()) {
+			Node simp = simple();
 			if(comb1() == null) {
-				return simple();
+				return simp;
 			}
 			else {
-				At comb1At = new At(simple(), comb1());
+				At comb1At = new At(simp, comb1());
 				return comb1At;
 			}
 		}
@@ -470,9 +467,11 @@ public class Parser {
 	
 	private Node builtin() {
 		if(equalLookAhead(tokenHd)) {
+			match(tokenHd);
 			return nodeHd;
 		}
 		else {
+			match(tokenTl);
 			return nodeTl;
 		}
 	}
@@ -516,6 +515,7 @@ public class Parser {
 		}
 		
 		else if(equalLookAhead(tokenNil)) {	//eigene klasse constNil
+			match(tokenNil);
 			return nodeNil;
 		}
 		
@@ -526,12 +526,15 @@ public class Parser {
 	
 	private Node prefix() {
 		if(equalLookAhead(tokenMinus)) {
+			match(tokenMinus);
 			return nodeMinus;
 		}
 		else if(equalLookAhead(tokenPlus)) {
+			match(tokenPlus);
 			return nodePlus;
 		}
 		else if(equalLookAhead(tokenNot)) {
+			match(tokenNot);
 			return nodeNot;
 		}
 		else {
@@ -541,9 +544,11 @@ public class Parser {
 	
 	private Node addop() {
 		if(equalLookAhead(tokenMinus)) {
+			match(tokenMinus);
 			return nodeMinus;
 		}
 		else if(equalLookAhead(tokenPlus)) {
+			match(tokenPlus);
 			return nodePlus;
 		}
 		else {
@@ -553,9 +558,11 @@ public class Parser {
 	
 	private Node mulop() {
 		if(equalLookAhead(tokenMul)) {
+			match(tokenMul);
 			return nodeMul;
 		}
 		else if(equalLookAhead(tokenDiv)) {
+			match(tokenDiv);
 			return nodeDiv;
 		}
 		else {
@@ -565,21 +572,27 @@ public class Parser {
 	
 	private Node relop() {
 		if(equalLookAhead(tokenEqu)) {
+			match(tokenEqu);
 			return nodeEqu;
 		}
 		else if(equalLookAhead(tokenNeq)) {
+			match(tokenNeq);
 			return nodeNeq;
 		}
 		else if(equalLookAhead(tokenLes)) {
+			match(tokenLes);
 			return nodeLes;
 		}
 		else if(equalLookAhead(tokenGrt)) {
+			match(tokenGrt);
 			return nodeGrt;
 		}
 		else if(equalLookAhead(tokenLeq)) {
+			match(tokenLeq);
 			return nodeLeq;
 		}
 		else if(equalLookAhead(tokenGeq)) {
+			match(tokenGeq);
 			return nodeGeq;
 		}
 		else {
@@ -589,7 +602,8 @@ public class Parser {
 	
 	private String id() {
 		if(isId()) {
-			String onlyID = l.getLookahead().toString().substring(5, l.getLookahead().toString().length() - 1);
+			Token id = l.getToken();
+			String onlyID = id.toString().substring(5, id.toString().length() - 1);
 			return onlyID;
 		}
 		else {
@@ -599,7 +613,8 @@ public class Parser {
 	
 	private int num() {
 		if(isNum()) {
-			String onlyNum = l.getLookahead().toString().substring(15, l.getLookahead().toString().length() - 1);
+			Token numToken = l.getToken();
+			String onlyNum = numToken.toString().substring(15, numToken.toString().length() - 1);
 			int num = Integer.parseInt(onlyNum);
 			return num;
 		}
@@ -609,10 +624,11 @@ public class Parser {
 	}
 	
 	private boolean bool() {
-		if(l.getLookahead().toString().matches(checkBoolF)) {
+		Token bool = l.getToken();
+		if(bool.toString().matches(checkBoolF)) {
 			return true;
 		}
-		else if(l.getLookahead().toString().matches(checkBoolT)) {
+		else if(bool.toString().matches(checkBoolT)) {
 			return false;
 		}
 		else {
@@ -622,7 +638,8 @@ public class Parser {
 	
 	private String string() {
 		if(isString()) {
-			String onlyString = l.getLookahead().toString().substring(18, l.getLookahead().toString().length() - 1);
+			Token string = l.getToken();
+			String onlyString = string.toString().substring(18, string.toString().length() - 1);
 			return onlyString;
 		}
 		else {
