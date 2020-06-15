@@ -12,7 +12,10 @@ public class Keywords extends Token {
 		WHERE,
 		NOT,
 		AND,
-		OR
+		OR,
+		HD,
+		TL,
+		NIL
 	}
 	
 	public Keywords(String strKey) {
@@ -51,6 +54,12 @@ public class Keywords extends Token {
 			return kw.AND;
 		case "or":
 			return kw.OR;
+		case "hd":
+			return kw.HD;
+		case "tl":
+			return kw.TL;
+		case "nil":
+			return kw.NIL;
 		default:
 			// error: unknown keyword
 			throw new RuntimeException("unknown symbol");	

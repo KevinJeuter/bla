@@ -1,5 +1,8 @@
 package main;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,11 +15,14 @@ import ast.Pair;
 import ast.StringConst;
 import ast.Var;
 import ast.Where;
+import lexer.Constants;
+import lexer.Identifier;
 import visitors.DotVisitor;
 
 public class Main {
 
-	public static void main(String[] args) {
+	static lexer.Token l = new lexer.Identifier("hallo1323123");
+	public static void main(String[] args) throws IOException {
 		
 		//System.out.println(manualAst().toString());
 		
@@ -24,12 +30,26 @@ public class Main {
 //		NumberConst x41 = new NumberConst(41);
 //		At root = new At(x1, x41);
 		
+		if(args.length <= 0) {
+			throw new RuntimeException("No file selected.");
+		}
+		
+		String src = fileToString(args[0]);
+		
+		lexer.Lexer l = new lexer.Lexer(src);
+		
+		parser.Parser p = new parser.Parser(l);
+		
 		DotVisitor v = new DotVisitor();
 		
 		v.visit(manualAst());
 		
-		System.out.println(v.getDotResult());		
+		System.out.println(v.getDotResult());
 
+	}
+	
+	private static String fileToString(String fileName) throws IOException {
+		return Files.readString(Path.of(fileName));
 	}
 	
 	public static Def manualAst() {
@@ -68,12 +88,12 @@ public class Main {
 		At equXsAt = new At(equ, xs);
 		//at Knoten @ @ nil
 		At atNilAtLeft = new At(equXsAt, nil);
-		//parameter fï¿½r null
+		//parameter für null
 		ArrayList<String> nullParam = new ArrayList<String>();
 		nullParam.add("xs");
-		//paar aus namen und knoten fï¿½r def
+		//paar aus namen und knoten für def
 		Pair<ArrayList<String>, Node> defPair = new Pair<ArrayList<String>, Node>(nullParam, atNilAtLeft);
-		//hashmap fï¿½r def
+		//hashmap für def
 		HashMap<String, Pair<ArrayList<String>, Node>> defHash = new HashMap<String, Pair<ArrayList<String>, Node>>();
 		defHash.put("null", defPair);
 		

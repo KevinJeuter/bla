@@ -1,5 +1,8 @@
 package parser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import ast.At;
 import ast.BooleanConst;
 import ast.Builtin;
@@ -13,7 +16,6 @@ import ast.Where;
 import lexer.Constants;
 import lexer.Identifier;
 import lexer.Keywords;
-import lexer.Main;
 import lexer.Specials;
 import lexer.Symbols;
 import lexer.Token;
@@ -22,20 +24,27 @@ import lexer.Lexer;
 
 public class Parser {
 	
-	private static Lexer l = new Lexer(lexer.Main.getTokens());
+	private Lexer l;
+	
+	public Parser(Lexer l) {
+		this.l = l;
+	}
 	//nicht 2 mal expr(), wenn dann mit variable
 	
 	//expr(), condexpr(), listexpr() bringt die tokens dazwischen als node
-	private static Identifier tokenNil = new Identifier("nil");
-	private static Identifier tokenHd = new Identifier("hd");
+	
+	private static Keywords tokenNil = new Keywords("nil");
+	private static Keywords tokenHd = new Keywords("hd");
+	private static Keywords tokenTl = new Keywords("tl");
 	private static Keywords ifKey = new Keywords("if");
 	private static Keywords thenKey = new Keywords("then");
 	private static Keywords elseKey = new Keywords("else");
 	private static Keywords tokenOr = new Keywords("or");
 	private static Keywords tokenAnd = new Keywords("and");
+	private static Keywords tokenNot = new Keywords("not");
 	private static Keywords def = new Keywords("def");
 	private static Symbols tokenEqu = new Symbols("=");
-	private static Symbols tokenNeq = new Symbols("!=");
+	private static Symbols tokenNeq = new Symbols("~=");
 	private static Symbols tokenGeq = new Symbols(">=");
 	private static Symbols tokenLeq = new Symbols("<=");
 	private static Symbols tokenGrt = new Symbols(">");
@@ -45,6 +54,8 @@ public class Parser {
 	private static Symbols dot = new Symbols(".");
 	private static Symbols tokenPlus = new Symbols("+");
 	private static Symbols tokenMinus = new Symbols("-");
+	private static Symbols tokenMul = new Symbols("*");
+	private static Symbols tokenDiv = new Symbols("/");
 	private static Symbols tokenParenl = new Symbols("(");
 	private static Symbols tokenParenr = new Symbols(")");
 
@@ -62,58 +73,75 @@ public class Parser {
 	private static Node nodeMinus = new Builtin(Builtin.funct.MINUS);
 	private static Node nodeHd = new Builtin(Builtin.funct.HD);
 	private static Node nodeTl = new Builtin(Builtin.funct.TL);
-	private static Node nodeNil = new Builtin(Builtin.funct.NIL);
-	private static Node empty = new StringConst("");
+	private static Node nodeNil = new Builtin(Builtin.funct.NIL);	//noch umformen
+	private static Node nodeNot = new Builtin(Builtin.funct.NOT);
+	private static Node nodeMul = new Builtin(Builtin.funct.MUL);
+	private static Node nodeDiv = new Builtin(Builtin.funct.DIV);
 	
-	public static Node system() {
-		if(l.getLookahead().toString().equals(def.toString())) {
-			
+	private boolean equalLookAhead(Token test) {
+		return l.getLookahead().toString().equals(test.toString());
+	}
+	
+	public Def system() {
+		HashMap<String, Pair<ArrayList<String>, Node>> funcdefs = new HashMap<String, Pair<ArrayList<String>, Node>>();
+		if(equalLookAhead(def)) {
+			funcdefs = funcdefs().returnHashMap();
+			match(dot);
+			Node expr = expr();
+			Def system = new Def(funcdefs, expr);
+			return system;
 		}
 		else {
-			return expr();
+			ArrayList<String> emptyList = new ArrayList<String>();
+			emptyList.add("");
+			Pair<ArrayList<String>, Node> emptyPair = new Pair<ArrayList<String>, Node>(emptyList, null);
+			funcdefs.put("", emptyPair);
+			Def expr = new Def(funcdefs, expr());
+			return expr;
 		}
 	}
 	
-	public static Node funcdefs() {
-		match(def);
-		
+	private DefHashMap funcdefs() {
+		DefHashMap f = new DefHashMap();
+		return funcdefs1(f);
 	}
 	
-	public static Node defs() {
-		At defsAt = new At(def(), defs1());
-		return defsAt;
-	}
-	
-	public static Node defs1() {
-		if(l.getLookahead().toString().equals(tokenSemicolon.toString())) {
-			match(tokenSemicolon);
-			At defs1At = new At(def(), defs1());
-			return defs1At;
+	private DefHashMap funcdefs1(DefHashMap f) {
+		if(equalLookAhead(def)) {
+			match(def);
+			def(f);
+			return funcdefs1(f);
 		}
 		else {
-			return empty;
+			return f;
 		}
 	}
 	
-	public static Node def() {
-		At defAt = new At(name(), abstraction());
-		return defAt;
+	private DefHashMap def(DefHashMap f) {
+		f.put(name().toString(), abstraction());
+		return f;
 	}
 	
-	public static Node abstraction() {
-		if(l.getLookahead().toString().equals(tokenEqu.toString())) {
+	private ArrayList<String> var = new ArrayList<String>();
+	private Node funct;
+	
+	private Pair<ArrayList<String>, Node> abstraction() {
+		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
-			At abstractionAt = new At(nodeEqu, expr());
-			return abstractionAt;
+			funct = expr();
 		}
 		else {
-			At abstrElseAt = new At(name(), abstraction());
-			return abstrElseAt;
+			var.add(name().toString());
+			abstraction();
 		}
+		Pair<ArrayList<String>, Node> abst = new Pair<ArrayList<String>, Node>(var, funct);
+		var.clear();
+		
+		return abst;
 	}
 	
-	public static Node condExpr() {
-		if(l.getLookahead().toString().equals(ifKey.toString())) {
+	private Node condExpr() {
+		if(equalLookAhead(ifKey)) {
 			match(ifKey);
 			At ifAt = new At(nodeCond, expr());
 			match(thenKey);
@@ -129,7 +157,7 @@ public class Parser {
 	
 	//bei listen braucht man parameter
 	
-	private static Token match(Token t) {
+	private Token match(Token t) {
 		Token x = l.getToken();
 		if (x.toString().equals(t.toString())) {
 			return x;
@@ -139,115 +167,213 @@ public class Parser {
 		}
 	}
 	
-	private static Node expr() {
-		At exprAt = new At(condExpr(), empty);
-		return exprAt;
+	private Node expr() {
+		if(expr1() == null) {
+			return condExpr();
+		}
+		else {
+			At exprAt = new At(condExpr(), expr1());
+			return exprAt;
+		}
 	}
 	
-	private static Node listExpr() {
+	private Node expr1() {
+		return null;
+	}
+	
+	private Node listExpr() {
 		At listExprAt = new At(opExpr(), listExpr1());
 		return listExprAt;
 	}
 	
-	private static Node listExpr1() {
-		if(l.getLookahead().toString().equals(tokenColon.toString())) {
+	private Node listExpr1() {
+		if(equalLookAhead(tokenColon)) {
 			match(tokenColon);
 			At listExpr1At = new At(nodeColon, listExpr());
 			return listExpr1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node opExpr() {
+	private Node opExpr() {
 		At opExprAt = new At(conjunct(), opExpr1());
 		return opExprAt;
 	}
 	
-	private static Node opExpr1() {
-		if(l.getLookahead().toString().equals(tokenOr.toString())) {
+	private Node opExpr1() {
+		if(equalLookAhead(tokenOr)) {
 			match(tokenOr);
 			At opExpr1AtOr = new At(nodeOr, conjunct());
 			At opExpr1At = new At(opExpr1AtOr, opExpr1());
 			return opExpr1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node conjunct() {
+	private Node conjunct() {
 		At conjunctAt = new At(compar(), conjunct1());
 		return conjunctAt;
 	}
 	
-	private static Node conjunct1() {
-		if(l.getLookahead().toString().contentEquals(tokenAnd.toString())) {
+	private Node conjunct1() {
+		if(equalLookAhead(tokenAnd)) {
 			match(tokenAnd);
 			At conjunct1AtAnd = new At(nodeAnd, compar());
 			At conjunct1At = new At(conjunct1AtAnd, conjunct1());
 			return conjunct1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node compar() {
+	private Node compar() {
 		At comparAt = new At(add(), compar1());
 		return comparAt;
 	}
 	
-	private static Node compar1() {
-		if() {
-			match(relop());	//hier muss token von relop
-			At compar1RelopAt = new At(relop(), add());
+	private Token relopToken;
+	
+	private boolean isRelopToken() {
+		if(equalLookAhead(tokenEqu)) {
+			relopToken = tokenEqu;
+			return true;
+		}
+		else if(equalLookAhead(tokenNeq)) {
+			relopToken = tokenNeq;
+			return true;
+		}
+		else if(equalLookAhead(tokenLes)) {
+			relopToken = tokenLes;
+			return true;
+		}
+		else if(equalLookAhead(tokenGrt)) {
+			relopToken = tokenGrt;
+			return true;
+		}
+		else if(equalLookAhead(tokenLeq)) {
+			relopToken = tokenLeq;
+			return true;
+		}
+		else if(equalLookAhead(tokenGeq)) {
+			relopToken = tokenGeq;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	private Node compar1() {
+		if(isRelopToken()) {
+			Node relopNode = relop();
+			match(relopToken);
+			At compar1RelopAt = new At(relopNode, add());
 			At compar1At = new At(compar1RelopAt, compar1());
 			return compar1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node add() {
+	private Node add() {
 		At addAt = new At(mul(), add1());
 		return addAt;
 	}
 	
-	private static Node add1() {
-		if() {
-			match(addop());	//hier muss token von addop
-			At add1AddopAt = new At(addop(), mul());
+	private Token addopToken;
+	
+	private boolean isAddopToken() {
+		if(equalLookAhead(tokenPlus)) {
+			addopToken = tokenPlus;
+			return true;
+		}
+		else if(equalLookAhead(tokenMinus)) {
+			addopToken = tokenMinus;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	private Node add1() {
+		if(isAddopToken()) {
+			Node addopNode = addop();
+			match(addopToken);	//hier muss token von addop
+			At add1AddopAt = new At(addopNode, mul());
 			At add1At = new At(add1AddopAt, add1());
 			return add1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node mul() {
+	private Node mul() {
 		At mulAt = new At(factor(), mul1());
 		return mulAt;
 	}
 	
-	private static Node mul1() {
-		if() {
-			match(mulop()); //hier muss token von mulop
-			At mul1MulopAt = new At(mulop(), factor());
+	private Token mulopToken;
+	
+	private boolean isMulopToken() {
+		if(equalLookAhead(tokenMul)) {
+			mulopToken = tokenMul;
+			return true;
+		}
+		else if(equalLookAhead(tokenDiv)) {
+			mulopToken = tokenDiv;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	private Node mul1() {
+		if(isMulopToken()) {
+			Node mulopNode = mulop();
+			match(mulopToken); //hier muss token von mulop
+			At mul1MulopAt = new At(mulopNode, factor());
 			At mul1At = new At(mul1MulopAt, mul1());
 			return mul1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node factor() {
-		if() {
-			At factorAt = new At(prefix(), comb());
+	private Token prefixToken;
+	
+	private boolean isPrefixToken() {
+		if(equalLookAhead(tokenMinus)) {
+			prefixToken = tokenMinus;
+			return true;
+		}
+		else if(equalLookAhead(tokenPlus)) {
+			prefixToken = tokenPlus;
+			return true;
+		}
+		else if(equalLookAhead(tokenNot)) {
+			prefixToken = tokenNot;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	private Node factor() {
+		if(isPrefixToken()) {
+			Node prefixNode = prefix();
+			match(prefixToken);
+			At factorAt = new At(prefixNode, comb());
 			return factorAt;
 		}
 		else {
@@ -255,31 +381,47 @@ public class Parser {
 		}
 	}
 	
-	private static Node comb() {
+	private Node comb() {
 		At combAt = new At(simple(), comb1());
 		return combAt;
 	}
 	
-	private static Node comb1() {
-		if() {
+	private boolean isIdClass() {
+		return l.getLookahead().getClass() == lexer.Identifier.class;
+	}
+	
+	private boolean isHdOrTl() {
+		return equalLookAhead(tokenHd) || equalLookAhead(tokenTl);
+	}
+	
+	private boolean isConstantClass() {
+		return l.getLookahead().getClass() == lexer.Constants.class;
+	}
+	
+	private boolean isParenl() {
+		return equalLookAhead(tokenParenl);
+	}
+	
+	private Node comb1() {
+		if(isIdClass() || isHdOrTl() || isConstantClass() || isParenl()) {
 			At comb1At = new At(simple(), comb1());
 			return comb1At;
 		}
 		else {
-			return empty;
+			return null;
 		}
 	}
 	
-	private static Node simple() {
-		if() {
+	private Node simple() {
+		if(isIdClass()) {
 			return name();
 		}
 		
-		else if() {
+		else if(isHdOrTl()) {
 			return builtin();
 		}
 		
-		else if() {
+		else if(isConstantClass()) {
 			return constant();
 		}
 		
@@ -291,12 +433,13 @@ public class Parser {
 		}
 	}
 	
-	private static Node name() {
-		return id();
+	private Node name() {
+		Var name = new Var(id());
+		return name;
 	}
 	
-	private static Node builtin() {
-		if(l.getLookahead().toString().equals(tokenHd.toString())) {
+	private Node builtin() {
+		if(equalLookAhead(tokenHd)) {
 			return nodeHd;
 		}
 		else {
@@ -304,20 +447,45 @@ public class Parser {
 		}
 	}
 	
-	private static Node constant() {
-		if() {
-			return num();
+	String checkID = "<ID: [a-zA-Z_][a-zA-Z_0-9]*>";
+	String checkNumber = "<Constant num: [0-9]+>";
+	String checkBoolT = "<Constant boolean: true>";
+	String checkBoolF = "<Constant boolean: false>";
+	String checkString = "<Constant string: [\"][\\x00-\\x7F]*[\"]>";
+	
+	private boolean isId() {
+		return l.getLookahead().toString().matches(checkID);
+	}
+	
+	private boolean isNum() {
+		return l.getLookahead().toString().matches(checkNumber);
+	}
+	
+	private boolean isBool() {
+		return l.getLookahead().toString().matches(checkBoolT) || l.getLookahead().toString().matches(checkBoolF);
+	}
+	
+	private boolean isString() {
+		return l.getLookahead().toString().matches(checkString);
+	}
+	
+	private Node constant() {
+		if(isNum()) {
+			NumberConst num = new NumberConst(num());
+			return num;
 		}
 		
-		else if() {
-			return bool();
+		else if(isBool()) {
+			BooleanConst bool = new BooleanConst(bool());
+			return bool;
 		}
 		
-		else if() {
-			return string();
+		else if(isString()) {
+			StringConst str = new StringConst(string());
+			return str;
 		}
 		
-		else if(l.getLookahead().toString().equals(tokenNil.toString())) {
+		else if(equalLookAhead(tokenNil)) {	//eigene klasse constNil
 			return nodeNil;
 		}
 		
@@ -326,40 +494,109 @@ public class Parser {
 		}
 	}
 	
-	private static Node prefix() {
-		
+	private Node prefix() {
+		if(equalLookAhead(tokenMinus)) {
+			return nodeMinus;
+		}
+		else if(equalLookAhead(tokenPlus)) {
+			return nodePlus;
+		}
+		else if(equalLookAhead(tokenNot)) {
+			return nodeNot;
+		}
+		else {
+			throw new RuntimeException("not a prefix");
+		}
 	}
 	
-	private static Boolean prefixop() {
-		
+	private Node addop() {
+		if(equalLookAhead(tokenMinus)) {
+			return nodeMinus;
+		}
+		else if(equalLookAhead(tokenPlus)) {
+			return nodePlus;
+		}
+		else {
+			throw new RuntimeException("not an addop");
+		}
 	}
 	
-	private static Node addop() {
-		
+	private Node mulop() {
+		if(equalLookAhead(tokenMul)) {
+			return nodeMul;
+		}
+		else if(equalLookAhead(tokenDiv)) {
+			return nodeDiv;
+		}
+		else {
+			throw new RuntimeException("not a mulop");
+		}
 	}
 	
-	private static Node mulop() {
-		
+	private Node relop() {
+		if(equalLookAhead(tokenEqu)) {
+			return nodeEqu;
+		}
+		else if(equalLookAhead(tokenNeq)) {
+			return nodeNeq;
+		}
+		else if(equalLookAhead(tokenLes)) {
+			return nodeLes;
+		}
+		else if(equalLookAhead(tokenGrt)) {
+			return nodeGrt;
+		}
+		else if(equalLookAhead(tokenLeq)) {
+			return nodeLeq;
+		}
+		else if(equalLookAhead(tokenGeq)) {
+			return nodeGeq;
+		}
+		else {
+			throw new RuntimeException("not a relop");
+		}
 	}
 	
-	private static Node relop() {
-
+	private String id() {
+		if(isId()) {
+			String onlyID = l.getLookahead().toString().substring(5, l.getLookahead().toString().length() - 1);
+			return onlyID;
+		}
+		else {
+			throw new RuntimeException("not an id");
+		}
 	}
 	
-	private static Node id() {
-		
+	private int num() {
+		if(isNum()) {
+			String onlyNum = l.getLookahead().toString().substring(15, l.getLookahead().toString().length() - 1);
+			int num = Integer.parseInt(onlyNum);
+			return num;
+		}
+		else {
+			throw new RuntimeException("not a number");
+		}
 	}
 	
-	private static Node num() {
-		
+	private boolean bool() {
+		if(l.getLookahead().toString().matches(checkBoolF)) {
+			return true;
+		}
+		else if(l.getLookahead().toString().matches(checkBoolT)) {
+			return false;
+		}
+		else {
+			throw new RuntimeException("not a bool const");
+		}
 	}
 	
-	private static Node bool() {
-		
-	}
-	
-	private static Node string() {
-		
-	}
-	
+	private String string() {
+		if(isString()) {
+			String onlyString = l.getLookahead().toString().substring(18, l.getLookahead().toString().length() - 1);
+			return onlyString;
+		}
+		else {
+			throw new RuntimeException("not a string const");
+		}
+	} 
 }

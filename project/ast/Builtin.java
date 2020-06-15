@@ -23,7 +23,8 @@ public class Builtin extends Node{
 		OR,
 		HD,
 		TL,
-		NIL
+		NIL,
+		NOT
 	}
 	
 	public Builtin(funct function) {
