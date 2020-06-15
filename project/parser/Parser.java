@@ -82,25 +82,35 @@ public class Parser {
 		return l.getLookahead().toString().equals(test.toString());
 	}
 	
+	private Token match(Token t) {
+		Token x = l.getToken();
+		if (x.toString().equals(t.toString())) {
+			return x;
+		}
+		else {
+			throw new RuntimeException("Token mismatch");
+		}
+	}
+	
 	public Def system() {
 		HashMap<String, Pair<ArrayList<String>, Node>> funcdefs = new HashMap<String, Pair<ArrayList<String>, Node>>();
-		if(equalLookAhead(def)) {
+	/*	if(equalLookAhead(def)) {
 			funcdefs = funcdefs().returnHashMap();
 			match(dot);
 			Node expr = expr();
 			Def system = new Def(funcdefs, expr);
 			return system;
 		}
-		else {
+		else {*/
 			ArrayList<String> emptyList = new ArrayList<String>();
 			emptyList.add("");
 			Pair<ArrayList<String>, Node> emptyPair = new Pair<ArrayList<String>, Node>(emptyList, null);
 			funcdefs.put("", emptyPair);
 			Def expr = new Def(funcdefs, expr());
 			return expr;
-		}
+		//}
 	}
-	
+	/*
 	private DefHashMap funcdefs() {
 		DefHashMap f = new DefHashMap();
 		return funcdefs1(f);
@@ -123,23 +133,20 @@ public class Parser {
 	}
 	
 	private ArrayList<String> var = new ArrayList<String>();
-	private Node funct;
 	
 	private Pair<ArrayList<String>, Node> abstraction() {
 		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
-			funct = expr();
+			Pair<ArrayList<String>, Node> abst = new Pair<ArrayList<String>, Node>(var, expr());
+			var.clear();
+			return abst;
 		}
 		else {
 			var.add(name().toString());
-			abstraction();
-		}
-		Pair<ArrayList<String>, Node> abst = new Pair<ArrayList<String>, Node>(var, funct);
-		var.clear();
-		
-		return abst;
+			return abstraction();
+		}	
 	}
-	
+	*/
 	private Node condExpr() {
 		if(equalLookAhead(ifKey)) {
 			match(ifKey);
@@ -157,16 +164,6 @@ public class Parser {
 	
 	//bei listen braucht man parameter
 	
-	private Token match(Token t) {
-		Token x = l.getToken();
-		if (x.toString().equals(t.toString())) {
-			return x;
-		}
-		else {
-			throw new RuntimeException("Token mismatch");
-		}
-	}
-	
 	private Node expr() {
 		if(expr1() == null) {
 			return condExpr();
@@ -180,7 +177,7 @@ public class Parser {
 	private Node expr1() {
 		return null;
 	}
-	
+
 	private Node listExpr() {
 		At listExprAt = new At(opExpr(), listExpr1());
 		return listExprAt;
@@ -193,21 +190,33 @@ public class Parser {
 			return listExpr1At;
 		}
 		else {
-			return null;
+			At endListAt = new At(nodeColon, nodeNil);
+			return endListAt;
 		}
 	}
 	
 	private Node opExpr() {
-		At opExprAt = new At(conjunct(), opExpr1());
-		return opExprAt;
+		Node con = conjunct();
+		if(opExpr1() == null) {
+			return con;
+		}
+		else {
+			At opExprAt = new At(conjunct(), opExpr1());
+			return opExprAt;
+		}
 	}
 	
 	private Node opExpr1() {
 		if(equalLookAhead(tokenOr)) {
 			match(tokenOr);
 			At opExpr1AtOr = new At(nodeOr, conjunct());
-			At opExpr1At = new At(opExpr1AtOr, opExpr1());
-			return opExpr1At;
+			if(opExpr1() == null) {
+				return opExpr1AtOr;
+			}
+			else {
+				At opExpr1At = new At(opExpr1AtOr, opExpr1());
+				return opExpr1At;
+			}
 		}
 		else {
 			return null;
@@ -215,16 +224,27 @@ public class Parser {
 	}
 	
 	private Node conjunct() {
-		At conjunctAt = new At(compar(), conjunct1());
-		return conjunctAt;
+		Node com = compar();
+		if(conjunct1() == null) {
+			return compar();
+		}
+		else {
+			At conjunctAt = new At(compar(), conjunct1());
+			return conjunctAt;
+		}
 	}
 	
 	private Node conjunct1() {
 		if(equalLookAhead(tokenAnd)) {
 			match(tokenAnd);
 			At conjunct1AtAnd = new At(nodeAnd, compar());
-			At conjunct1At = new At(conjunct1AtAnd, conjunct1());
-			return conjunct1At;
+			if(conjunct1() == null) {
+				return conjunct1AtAnd;
+			}
+			else {
+				At conjunct1At = new At(conjunct1AtAnd, conjunct1());
+				return conjunct1At;
+			}
 		}
 		else {
 			return null;
@@ -232,8 +252,13 @@ public class Parser {
 	}
 	
 	private Node compar() {
-		At comparAt = new At(add(), compar1());
-		return comparAt;
+		if(compar1() == null) {
+			return add();
+		}
+		else {
+			At comparAt = new At(add(), compar1());
+			return comparAt;
+		}
 	}
 	
 	private Token relopToken;
@@ -387,7 +412,7 @@ public class Parser {
 	}
 	
 	private boolean isIdClass() {
-		return l.getLookahead().getClass() == lexer.Identifier.class;
+		return l.getLookahead().getClass() == Identifier.class;
 	}
 	
 	private boolean isHdOrTl() {
@@ -395,7 +420,7 @@ public class Parser {
 	}
 	
 	private boolean isConstantClass() {
-		return l.getLookahead().getClass() == lexer.Constants.class;
+		return l.getLookahead().getClass() == Constants.class;
 	}
 	
 	private boolean isParenl() {
@@ -404,8 +429,13 @@ public class Parser {
 	
 	private Node comb1() {
 		if(isIdClass() || isHdOrTl() || isConstantClass() || isParenl()) {
-			At comb1At = new At(simple(), comb1());
-			return comb1At;
+			if(comb1() == null) {
+				return simple();
+			}
+			else {
+				At comb1At = new At(simple(), comb1());
+				return comb1At;
+			}
 		}
 		else {
 			return null;

@@ -21,10 +21,7 @@ import visitors.DotVisitor;
 
 public class Main {
 
-	static lexer.Token l = new lexer.Identifier("hallo1323123");
 	public static void main(String[] args) throws IOException {
-		
-		//System.out.println(manualAst().toString());
 		
 //		NumberConst x1 = new NumberConst(1);
 //		NumberConst x41 = new NumberConst(41);
@@ -42,7 +39,7 @@ public class Main {
 		
 		DotVisitor v = new DotVisitor();
 		
-		v.visit(manualAst());
+		v.visit(p.system());
 		
 		System.out.println(v.getDotResult());
 
