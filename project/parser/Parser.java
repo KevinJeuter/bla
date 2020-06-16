@@ -256,7 +256,7 @@ public class Parser {
 	}
 	
 	private Node conjunct() {
-		//Wenn conjunct1 leer ist, gib nunr compar aus. Sonst mache ein At aus compar und conjunct
+		//Wenn conjunct1 leer ist, gib nur compar aus. Sonst mache ein At aus compar und conjunct
 		Node com = compar();
 		Node con1 = conjunct1();
 		if(con1 == null) {
@@ -481,7 +481,7 @@ public class Parser {
 			return simple;
 		}
 		else {
-			At combAt = new At(simple(), comb1());
+			At combAt = new At(simple, comb1);
 			return combAt;
 		}
 	}
@@ -526,11 +526,12 @@ public class Parser {
 				return comb1At;
 			}
 		}
+		
 		else {
 			return null;
 		}
 	}
-	
+
 	private Node simple() {
 		//Wenn das token eine id ist, gebe name zurück.
 		//Wenn es ein hd oder tl ist, gebe builtin zurück.
@@ -554,6 +555,7 @@ public class Parser {
 			match(tokenParenr);
 			return simpleExpr;
 		}
+		
 		else {
 			throw new RuntimeException("not a simple");
 		}

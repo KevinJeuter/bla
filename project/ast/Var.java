@@ -16,7 +16,7 @@ public class Var extends Node{
 	
 	@Override
 	public String toString() {
-		return "var(" + this.var + ")";
+		return this.var;
 	}
 
 	@Override
