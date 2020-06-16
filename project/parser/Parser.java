@@ -219,6 +219,45 @@ public class Parser {
 			return null;
 		}
 	}
+	/*
+	 * 
+	 * Nicht sicher, ob diese so stimmen. Sie funktionieren, jedoch weiss ich nicht ob der Baum so stimmt.
+	 * Genau gleich auch bei add und add1.
+	private Node listExpr() {
+		Node opEx = opExpr();
+		Node listexp1 = listExpr1(opEx);
+		//Wenn listExpr1 leer ist, gib nunr opEx aus
+		if(listexp1 == null) {
+			return opEx;
+		}
+		else {
+		//Sonst gib listexp1 raus
+			return listexp1;
+		}
+	}
+	
+	
+	
+	private Node listExpr1(Node x) {
+		if(equalLookAhead(tokenColon)) {
+			match(tokenColon);
+			Node opEx = opExpr();
+			Node listexpr1 = listExpr1(opEx);
+			At listExpr1At = new At(nodeColon, x);
+			if(listexpr1 == null) {
+				At y = new At(listExpr1At, opEx);
+				return y;
+			}
+			else {
+				At z = new At(listExpr1At, listexpr1);
+				return z;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	*/
 	
 	private Node opExpr() {
 		//Wenn opExpr1 leer ist, gib nur con aus, sonst ein At von con und opExpr1
@@ -354,6 +393,18 @@ public class Parser {
 	private Node add() {
 		//Wenn add1 leer ist, gebe mul aus. Sonst gebe ein at aus mul und add1 zurück.
 		Node mul = mul();
+		Node add1 = add1(mul);
+		if(add1 == null) {
+			return mul;
+		}
+		else {
+			return add1;
+		}
+	}
+	
+	/*
+	 *  private Node add() {
+		Node mul = mul();
 		Node add1 = add1();
 		if(add1 == null) {
 			return mul;
@@ -361,6 +412,7 @@ public class Parser {
 		At addAt = new At(mul, add1);
 		return addAt;
 	}
+	 */
 	
 	private boolean isAddopToken() {
 		//Überprüfe, ob das nächste token ein addop ist.
@@ -375,9 +427,29 @@ public class Parser {
 		}
 	}
 	
-	private Node add1() {
+	private Node add1(Node x) {
 		//Wenn das nächste token ein addop ist, erstelle ein at aus der node von addop und mul
 		//Wenn add1 leer ist, gebe das at raus, sonst gebe ein at aus dem letzten at und add1 raus.
+		if(isAddopToken()) {
+			Node addopNode = addop();
+			Node mul = mul();
+			Node add1 = add1(mul);
+			At add1AddopAt = new At(addopNode, x);
+			if(add1 == null) {
+				At y = new At(add1AddopAt, mul);
+				return y;
+			}
+			else {
+				At add1At = new At(add1AddopAt, add1);
+				return add1At;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	/*
+	 * private Node add1() {
 		if(isAddopToken()) {
 			Node addopNode = addop();
 			Node mul = mul();
@@ -395,6 +467,7 @@ public class Parser {
 			return null;
 		}
 	}
+	 */
 	
 	private Node mul() {
 		//Wenn mul1 leer ist, gebe fac aus. Sonst mache ein at aus fac und mul1 und gebe dieses raus.
