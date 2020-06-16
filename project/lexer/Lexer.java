@@ -207,15 +207,12 @@ public class Lexer {
 		for (int i = ptr; i < test.length(); i++) {
 			if (test.charAt(i) == '\n' || test.charAt(i) == '\r') {
 				newLine = newLine + Character.toString(test.charAt(i));
-				i++;
-				if (test.charAt(i) == '\r') {
-					newLine = newLine + Character.toString(test.charAt(i++));
-				}
+
 			} else {
 				break;
 			}
 		}
-		if(newLine.equals("\n") || newLine.equals("\r\n") || newLine.equals("\r")) {
+		if(newLine.equals("\n") || newLine.equals("\r\n") || newLine.equals("\r") || newLine.equals("\n\r")) {
 			return true;
 		}
 		else {
