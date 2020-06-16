@@ -390,8 +390,8 @@ public class Parser {
 		}
 	}
 	
+	/*
 	private Node add() {
-		//Wenn add1 leer ist, gebe mul aus. Sonst gebe ein at aus mul und add1 zurück.
 		Node mul = mul();
 		Node add1 = add1(mul);
 		if(add1 == null) {
@@ -401,9 +401,10 @@ public class Parser {
 			return add1;
 		}
 	}
+	*/
 	
-	/*
-	 *  private Node add() {
+	private Node add() {
+		//Wenn add1 leer ist, gebe mul aus. Sonst gebe ein at aus mul und add1 zurück.
 		Node mul = mul();
 		Node add1 = add1();
 		if(add1 == null) {
@@ -412,9 +413,9 @@ public class Parser {
 		At addAt = new At(mul, add1);
 		return addAt;
 	}
-	 */
+	 
 	
-	private boolean isAddopToken() {
+	 private boolean isAddopToken() {
 		//Überprüfe, ob das nächste token ein addop ist.
 		if(equalLookAhead(tokenPlus)) {
 			return true;
@@ -427,9 +428,8 @@ public class Parser {
 		}
 	}
 	
+	/*
 	private Node add1(Node x) {
-		//Wenn das nächste token ein addop ist, erstelle ein at aus der node von addop und mul
-		//Wenn add1 leer ist, gebe das at raus, sonst gebe ein at aus dem letzten at und add1 raus.
 		if(isAddopToken()) {
 			Node addopNode = addop();
 			Node mul = mul();
@@ -448,8 +448,10 @@ public class Parser {
 			return null;
 		}
 	}
-	/*
-	 * private Node add1() {
+	*/
+	private Node add1() {
+		//Wenn das nächste token ein addop ist, erstelle ein at aus der node von addop und mul
+		//Wenn add1 leer ist, gebe das at raus, sonst gebe ein at aus dem letzten at und add1 raus.
 		if(isAddopToken()) {
 			Node addopNode = addop();
 			Node mul = mul();
@@ -467,7 +469,6 @@ public class Parser {
 			return null;
 		}
 	}
-	 */
 	
 	private Node mul() {
 		//Wenn mul1 leer ist, gebe fac aus. Sonst mache ein at aus fac und mul1 und gebe dieses raus.
