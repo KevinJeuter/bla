@@ -178,11 +178,13 @@ public class Parser {
 	
 	private Node expr() {
 		//Wenn expr1 null ist, dann gib nur condExpr() aus, sonst mache ein At mit condExpr und expr
-		if(expr1() == null) {
-			return condExpr();
+		Node cond = condExpr();
+		Node exp1 = expr1();
+		if(exp1 == null) {
+			return cond;
 		}
 		else {
-			At exprAt = new At(condExpr(), expr1());
+			At exprAt = new At(cond, exp1);
 			return exprAt;
 		}
 	}
@@ -194,16 +196,20 @@ public class Parser {
 
 	private Node listExpr() {
 		Node opEx = opExpr();
-		if(listExpr1() == null) {
+		Node listexp1 = listExpr1();
+		//Wenn listExpr1 leer ist, gib nunr opEx aus
+		if(listexp1 == null) {
 			return opEx;
 		}
 		else {
-			At listExprAt = new At(opEx, listExpr1());
+		//Sonst gibt ein At von opEx und listExpr1 aus
+			At listExprAt = new At(opEx, listexp1);
 			return listExprAt;
 		}
 	}
 	
 	private Node listExpr1() {
+		//Wenn ein : kommt, mache ein at von : und listExpr, sonst kommt null raus.
 		if(equalLookAhead(tokenColon)) {
 			match(tokenColon);
 			At listExpr1At = new At(nodeColon, listExpr());
@@ -215,26 +221,32 @@ public class Parser {
 	}
 	
 	private Node opExpr() {
+		//Wenn opExpr1 leer ist, gib nur con aus, sonst ein At von con und opExpr1
 		Node con = conjunct();
-		if(opExpr1() == null) {
+		Node opexp1 = opExpr1();
+		if(opexp1 == null) {
 			return con;
 		}
 		else {
-			At opExprAt = new At(conjunct(), opExpr1());
+			At opExprAt = new At(con, opexp1);
 			return opExprAt;
 		}
 	}
 	
 	private Node opExpr1() {
+		//Wenn ein or kommt mache ein At von or und conjunct, wenn es kein weiteres or mehr gibt,
+		//also opExpr1 ist leer, gib nur dieses at aus. Sonst mache ein At aus dem letzten At und 
+		//der opExpr1 und gebe dieses aus.
 		if(equalLookAhead(tokenOr)) {
 			match(tokenOr);
 			Node con = conjunct();
+			Node opexp1 = opExpr1();
 			At opExpr1AtOr = new At(nodeOr, con);
-			if(opExpr1() == null) {
+			if(opexp1 == null) {
 				return opExpr1AtOr;
 			}
 			else {
-				At opExpr1At = new At(opExpr1AtOr, opExpr1());
+				At opExpr1At = new At(opExpr1AtOr, opexp1);
 				return opExpr1At;
 			}
 		}
@@ -244,26 +256,33 @@ public class Parser {
 	}
 	
 	private Node conjunct() {
+		//Wenn conjunct1 leer ist, gib nunr compar aus. Sonst mache ein At aus compar und conjunct
 		Node com = compar();
-		if(conjunct1() == null) {
+		Node con1 = conjunct1();
+		if(con1 == null) {
 			return com;
 		}
 		else {
-			At conjunctAt = new At(com, conjunct1());
+			At conjunctAt = new At(com, con1);
 			return conjunctAt;
 		}
 	}
 	
 	private Node conjunct1() {
+		//Wenn das nächste token ein and ist, mache ein at aus and und compar.
+		//Wenn compar1 leer ist, gebe dieses at aus. Sonst mache ein neues at
+		//aus dem letzten at und conjunct1
+		//Wenn kein and kommt, gibt conjunct1 null aus
 		if(equalLookAhead(tokenAnd)) {
 			match(tokenAnd);
 			Node com = compar();
+			Node con1 = conjunct1();
 			At conjunct1AtAnd = new At(nodeAnd, com);
-			if(conjunct1() == null) {
+			if(con1 == null) {
 				return conjunct1AtAnd;
 			}
 			else {
-				At conjunct1At = new At(conjunct1AtAnd, conjunct1());
+				At conjunct1At = new At(conjunct1AtAnd, con1);
 				return conjunct1At;
 			}
 		}
@@ -273,16 +292,20 @@ public class Parser {
 	}
 	
 	private Node compar() {
-		if(compar1() == null) {
-			return add();
+		//Wenn compar1 leer ist, gebe add aus. Sonst mache ein at aus add und compar1
+		Node add = add();
+		Node comp1 = compar1();
+		if(comp1 == null) {
+			return add;
 		}
 		else {
-			At comparAt = new At(add(), compar1());
+			At comparAt = new At(add, comp1);
 			return comparAt;
 		}
 	}
 	
 	private boolean isRelopToken() {
+		//Überprüfe, ob das nächste token ein relop ist.
 		if(equalLookAhead(tokenEqu)) {
 			return true;
 		}
@@ -307,11 +330,21 @@ public class Parser {
 	}
 	
 	private Node compar1() {
+		//Wenn das nächste token ein relop ist, mache eine zugehörige node.
+		//Erstelle dann ein at von der Node und add. Wenn compar1 leer ist, gebe dieses at aus
+		//Sonst mache einn neues at mit dem letzten at und compar1
 		if(isRelopToken()) {
 			Node relopNode = relop();
-			At compar1RelopAt = new At(relopNode, add());
-			At compar1At = new At(compar1RelopAt, compar1());
-			return compar1At;
+			Node add = add();
+			Node comp1 = compar1();
+			At compar1RelopAt = new At(relopNode, add);
+			if(comp1 == null) {
+				return compar1RelopAt;
+			}
+			else {
+				At compar1At = new At(compar1RelopAt, comp1);
+				return compar1At;
+			}
 		}
 		else {
 			return null;
@@ -319,11 +352,18 @@ public class Parser {
 	}
 	
 	private Node add() {
-		At addAt = new At(mul(), add1());
+		//Wenn add1 leer ist, gebe mul aus. Sonst gebe ein at aus mul und add1 zurück.
+		Node mul = mul();
+		Node add1 = add1();
+		if(add1 == null) {
+			return mul;
+		}
+		At addAt = new At(mul, add1);
 		return addAt;
 	}
 	
 	private boolean isAddopToken() {
+		//Überprüfe, ob das nächste token ein addop ist.
 		if(equalLookAhead(tokenPlus)) {
 			return true;
 		}
@@ -336,11 +376,20 @@ public class Parser {
 	}
 	
 	private Node add1() {
+		//Wenn das nächste token ein addop ist, erstelle ein at aus der node von addop und mul
+		//Wenn add1 leer ist, gebe das at raus, sonst gebe ein at aus dem letzten at und add1 raus.
 		if(isAddopToken()) {
 			Node addopNode = addop();
-			At add1AddopAt = new At(addopNode, mul());
-			At add1At = new At(add1AddopAt, add1());
-			return add1At;
+			Node mul = mul();
+			Node add1 = add1();
+			At add1AddopAt = new At(addopNode, mul);
+			if(add1 == null) {
+				return add1AddopAt;
+			}
+			else {
+				At add1At = new At(add1AddopAt, add1);
+				return add1At;
+			}
 		}
 		else {
 			return null;
@@ -348,11 +397,20 @@ public class Parser {
 	}
 	
 	private Node mul() {
-		At mulAt = new At(factor(), mul1());
-		return mulAt;
+		//Wenn mul1 leer ist, gebe fac aus. Sonst mache ein at aus fac und mul1 und gebe dieses raus.
+		Node fac = factor();
+		Node mul1 = mul1();
+		if(mul1 == null) {
+			return fac;
+		}
+		else {
+			At mulAt = new At(fac, mul1);
+			return mulAt;
+		}
 	}
 	
 	private boolean isMulopToken() {
+		//überprüfe ob das nächste token ein mulop ist.
 		if(equalLookAhead(tokenMul)) {
 			return true;
 		}
@@ -365,11 +423,20 @@ public class Parser {
 	}
 	
 	private Node mul1() {
+		//wenn das nächste token ein mulop ist, mache ein at aus mulopnode unnd fac. Wenn mul1 leer ist gebe
+		//diese aus. Sonst mache ein at aus dem letzten at und mul1
 		if(isMulopToken()) {
 			Node mulopNode = mulop();
-			At mul1MulopAt = new At(mulopNode, factor());
-			At mul1At = new At(mul1MulopAt, mul1());
-			return mul1At;
+			Node fac = factor();
+			Node mul1 = mul1();
+			At mul1MulopAt = new At(mulopNode, fac);
+			if(mul1 == null) {
+				return mul1MulopAt;
+			}
+			else {
+				At mul1At = new At(mul1MulopAt, mul1);
+				return mul1At;
+			}
 		}
 		else {
 			return null;
@@ -377,6 +444,7 @@ public class Parser {
 	}
 
 	private boolean isPrefixToken() {
+		//überprüfe ob das nächste token ein prefix ist
 		if(equalLookAhead(tokenMinus)) {
 			return true;
 		}
@@ -392,9 +460,12 @@ public class Parser {
 	}
 	
 	private Node factor() {
+		//Wenn das nächste Token ein prefix ist, gebe ein at vonn prefixnode und comb zurück,
+		//Sonst gebe nur comb zurück
 		if(isPrefixToken()) {
 			Node prefixNode = prefix();
-			At factorAt = new At(prefixNode, comb());
+			Node comb = comb();
+			At factorAt = new At(prefixNode, comb);
 			return factorAt;
 		}
 		else {
@@ -403,34 +474,55 @@ public class Parser {
 	}
 	
 	private Node comb() {
-		At combAt = new At(simple(), comb1());
-		return combAt;
+		//Wenn comb1 leer ist, returne simple. Sonst mache ein at aus simple und comb1 und gebe dieses zurück.
+		Node simple = simple();
+		Node comb1 = comb1();
+		if(comb1 == null) {
+			return simple;
+		}
+		else {
+			At combAt = new At(simple(), comb1());
+			return combAt;
+		}
 	}
 	
 	private boolean isIdClass() {
+		//Überprüfe, ob die Klasse des Tokens ein Identifier ist
 		return l.getLookahead().getClass() == Identifier.class;
 	}
 	
 	private boolean isHdOrTl() {
+		//Überprüfe ob das token ein hd odder tl ist
 		return equalLookAhead(tokenHd) || equalLookAhead(tokenTl);
 	}
 	
 	private boolean isConstantClass() {
+		//Überprüfe ob die klasse des tokens constants ist
 		return l.getLookahead().getClass() == Constants.class;
 	}
 	
 	private boolean isParenl() {
+		//Überprüfe, ob das token ein ( ist.
 		return equalLookAhead(tokenParenl);
 	}
 	
+	private boolean isNil() {
+		//Überprüfe, ob das token ein nil ist.
+		return equalLookAhead(tokenNil);
+	}
+	
 	private Node comb1() {
-		if(isIdClass() || isHdOrTl() || isConstantClass() || isParenl()) {
+		//wenn comb1 ein identifier, hd or tl, eine konstante oder eine offene klammer ist
+		//gebe entweder simple zurück(wenn das nächste comb1 empty ist) odedr ein at von simple und comb1 zurück
+		//(wenn das nächste token wieder ein comb1 ist). Sonst null.
+		if(isIdClass() || isHdOrTl() || isConstantClass() || isNil() || isParenl()) {
 			Node simp = simple();
-			if(comb1() == null) {
+			Node comb1 = comb1();
+			if(comb1 == null) {
 				return simp;
 			}
 			else {
-				At comb1At = new At(simp, comb1());
+				At comb1At = new At(simp, comb1);
 				return comb1At;
 			}
 		}
@@ -440,6 +532,10 @@ public class Parser {
 	}
 	
 	private Node simple() {
+		//Wenn das token eine id ist, gebe name zurück.
+		//Wenn es ein hd oder tl ist, gebe builtin zurück.
+		//Wenn es eine konstante ist, gebe constant zurück.
+		//sonst, wenn es eine klammer auf, dann expr, dann klammer zu ist, gebe expr zurück.
 		if(isIdClass()) {
 			return name();
 		}
@@ -448,24 +544,29 @@ public class Parser {
 			return builtin();
 		}
 		
-		else if(isConstantClass()) {
+		else if(isConstantClass() || isNil()) {
 			return constant();
 		}
 		
-		else {
+		else if(isParenl()) {
 			match(tokenParenl);
 			Node simpleExpr = expr();
 			match(tokenParenr);
 			return simpleExpr;
 		}
+		else {
+			throw new RuntimeException("not a simple");
+		}
 	}
 	
 	private Node name() {
+		//erstelle ein node var aus id() und gebe dieses zurück
 		Var name = new Var(id());
 		return name;
 	}
 	
 	private Node builtin() {
+		//wenn das token hd ist, matche es und gebe hd zurück, sonst matche auf tl und gebe tl zurück
 		if(equalLookAhead(tokenHd)) {
 			match(tokenHd);
 			return nodeHd;
@@ -483,22 +584,31 @@ public class Parser {
 	String checkString = "<Constant string: [\"][\\x00-\\x7F]*[\"]>";
 	
 	private boolean isId() {
+		//Überprüfe, ob es eine ID ist
 		return l.getLookahead().toString().matches(checkID);
 	}
 	
 	private boolean isNum() {
+		//Überprüfe, ob es eine num ist
 		return l.getLookahead().toString().matches(checkNumber);
 	}
 	
 	private boolean isBool() {
+		//Überprüfe, ob es ein bool ist
 		return l.getLookahead().toString().matches(checkBoolT) || l.getLookahead().toString().matches(checkBoolF);
 	}
 	
 	private boolean isString() {
+		//Überprüfe ob es ein string ist
 		return l.getLookahead().toString().matches(checkString);
 	}
 	
 	private Node constant() {
+		//Wenn das token ein num ist, mache eine neue node aus num() und gebe es zurück
+		//Wenn das token ein bool ist, mache eine neue node aus bool() und gebe es zurück
+		//Wenn das token ein string ist, mache eine neue node aus string() und gebe es zurück
+		//Wenn das token ein nil ist, matche es auf nil und gebe es zurück
+		//sonst fehler.
 		if(isNum()) {
 			NumberConst num = new NumberConst(num());
 			return num;
@@ -525,6 +635,7 @@ public class Parser {
 	}
 	
 	private Node prefix() {
+		//Überprüfe, ob token - + oder not und matche und returne dann darauf. sonst fehler
 		if(equalLookAhead(tokenMinus)) {
 			match(tokenMinus);
 			return nodeMinus;
@@ -543,6 +654,7 @@ public class Parser {
 	}
 	
 	private Node addop() {
+		//überprüfe ob token - + matche darauf und gebe es aus. sonst fehler
 		if(equalLookAhead(tokenMinus)) {
 			match(tokenMinus);
 			return nodeMinus;
@@ -557,6 +669,7 @@ public class Parser {
 	}
 	
 	private Node mulop() {
+		//überprüfe ob token * / matche darauf und gebe es aus. sonst fehler
 		if(equalLookAhead(tokenMul)) {
 			match(tokenMul);
 			return nodeMul;
@@ -571,6 +684,7 @@ public class Parser {
 	}
 	
 	private Node relop() {
+		//Überprüfe ob token = ~= >= <= > <, matche darauf und gebe es zurück, sonst fehler.
 		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
 			return nodeEqu;
@@ -601,6 +715,7 @@ public class Parser {
 	}
 	
 	private String id() {
+		//führe getToken aus und returne den string.
 		if(isId()) {
 			Token id = l.getToken();
 			String onlyID = id.toString().substring(5, id.toString().length() - 1);
@@ -612,38 +727,28 @@ public class Parser {
 	}
 	
 	private int num() {
-		if(isNum()) {
-			Token numToken = l.getToken();
-			String onlyNum = numToken.toString().substring(15, numToken.toString().length() - 1);
-			int num = Integer.parseInt(onlyNum);
-			return num;
-		}
-		else {
-			throw new RuntimeException("not a number");
-		}
+		//führe getToken aus und returne die num.
+		Token numToken = l.getToken();
+		String onlyNum = numToken.toString().substring(15, numToken.toString().length() - 1);
+		int num = Integer.parseInt(onlyNum);
+		return num;
 	}
 	
 	private boolean bool() {
+		//führe getToken aus und returne das bool.
 		Token bool = l.getToken();
-		if(bool.toString().matches(checkBoolF)) {
+		if(bool.toString().matches(checkBoolT)) {
 			return true;
 		}
-		else if(bool.toString().matches(checkBoolT)) {
-			return false;
-		}
 		else {
-			throw new RuntimeException("not a bool const");
+			return false;
 		}
 	}
 	
 	private String string() {
-		if(isString()) {
-			Token string = l.getToken();
-			String onlyString = string.toString().substring(18, string.toString().length() - 1);
-			return onlyString;
-		}
-		else {
-			throw new RuntimeException("not a string const");
-		}
+		//führe getToken aus und returne den string.
+		Token string = l.getToken();
+		String onlyString = string.toString().substring(18, string.toString().length() - 1);
+		return onlyString;
 	} 
 }
