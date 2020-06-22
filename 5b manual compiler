@@ -1,0 +1,38 @@
+def null xs = xs = nil
+.
+null (1:nil)
+
+null xs:
+-> [xs]((equal @ xs) @ nil)
+        ------f-----   -a-
+        
+[xs](f @ a) = S @ [xs]f @ [xs]a
+= ((S @ [xs](equal @ xs)) @ [xs]nil)
+             --f--  -a-
+= S @ ((S @ [xs]equal) @ [xs]xs) @ [xs]nil
+= S @ ((S @ [xs]equal) @ [xs]var(xs)) @ [xs]nil
+                --c--        xs=xs          -c-
+= (S @ ((S @ (K @ equal)) @ I) @ (K @ nil)
+------------------------------------------------------------------
+null (1:nil):
+
+S @ (S @ (K @ equal) @ I) @ (K @ nil) @ (1:nil)
+    ---------f-----------    ---g---     --x--
+(S)= S @ (K @ equal) @ I @ (1:nil) @ ((K @ nil) @ (1:nil))
+         -----f----   -g-  ---x---
+(S)= K @ equal @ (1:nil) @ (I @ (1:nil)) @ ((K @ nil) @ (1:nil))
+         --x--   ---y---
+(K)= equal @ (I @ (1:nil)) @ ((K @ nil) @ (1:nil))
+                   --x-- 
+(I)= equal @ (1:nil) @ (K @ nil @ (1:nil))
+                            -x-   ---y---
+(K)= equal @ (1:nil) @ nil
+
+= false
+
+      @
+      /\
+     /  nil
+    @
+   /  \
+equal  (1:nil)  
