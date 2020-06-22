@@ -196,93 +196,54 @@ public class Parser {
 
 	private Node listExpr() {
 		Node opEx = opExpr();
-		Node listexp1 = listExpr1();
-		//Wenn listExpr1 leer ist, gib nunr opEx aus
-		if(listexp1 == null) {
-			return opEx;
-		}
-		else {
-		//Sonst gibt ein At von opEx und listExpr1 aus
-			At listExprAt = new At(opEx, listexp1);
-			return listExprAt;
-		}
-	}
-	
-	private Node listExpr1() {
-		//Wenn ein : kommt, mache ein at von : und listExpr, sonst kommt null raus.
-		if(equalLookAhead(tokenColon)) {
-			match(tokenColon);
-			At listExpr1At = new At(nodeColon, listExpr());
-			return listExpr1At;
-		}
-		else {
-			return null;
-		}
-	}
-	/*
-	 * 
-	 * Nicht sicher, ob diese so stimmen. Sie funktionieren, jedoch weiss ich nicht ob der Baum so stimmt.
-	 * Genau gleich auch bei add und add1.
-	private Node listExpr() {
-		Node opEx = opExpr();
 		Node listexp1 = listExpr1(opEx);
 		//Wenn listExpr1 leer ist, gib nunr opEx aus
 		if(listexp1 == null) {
 			return opEx;
 		}
 		else {
-		//Sonst gib listexp1 raus
+		//Sonst gibt listexp1 aus
 			return listexp1;
 		}
 	}
 	
-	
-	
-	private Node listExpr1(Node x) {
+	private Node listExpr1(Node expr) {
+		//Wenn ein : kommt, mache ein at von : und expr und dann ein at von dem vorherigen und listExpr, sonst kommt null raus.
 		if(equalLookAhead(tokenColon)) {
 			match(tokenColon);
-			Node opEx = opExpr();
-			Node listexpr1 = listExpr1(opEx);
-			At listExpr1At = new At(nodeColon, x);
-			if(listexpr1 == null) {
-				At y = new At(listExpr1At, opEx);
-				return y;
-			}
-			else {
-				At z = new At(listExpr1At, listexpr1);
-				return z;
-			}
+			At listExpr1At = new At(nodeColon, expr);
+			At y = new At(listExpr1At, listExpr());
+			return y;
 		}
 		else {
 			return null;
 		}
 	}
-	*/
 	
 	private Node opExpr() {
 		//Wenn opExpr1 leer ist, gib nur con aus, sonst ein At von con und opExpr1
 		Node con = conjunct();
-		Node opexp1 = opExpr1();
+		Node opexp1 = opExpr1(con);
 		if(opexp1 == null) {
 			return con;
 		}
 		else {
-			At opExprAt = new At(con, opexp1);
-			return opExprAt;
+			return opexp1;
 		}
 	}
 	
-	private Node opExpr1() {
+	private Node opExpr1(Node x) {
 		//Wenn ein or kommt mache ein At von or und conjunct, wenn es kein weiteres or mehr gibt,
 		//also opExpr1 ist leer, gib nur dieses at aus. Sonst mache ein At aus dem letzten At und 
 		//der opExpr1 und gebe dieses aus.
 		if(equalLookAhead(tokenOr)) {
 			match(tokenOr);
 			Node con = conjunct();
-			Node opexp1 = opExpr1();
-			At opExpr1AtOr = new At(nodeOr, con);
+			Node opexp1 = opExpr1(con);
+			At opExpr1AtOr = new At(nodeOr, x);
 			if(opexp1 == null) {
-				return opExpr1AtOr;
+				At y = new At(opExpr1AtOr, con);
+				return y;
 			}
 			else {
 				At opExpr1At = new At(opExpr1AtOr, opexp1);
@@ -297,17 +258,16 @@ public class Parser {
 	private Node conjunct() {
 		//Wenn conjunct1 leer ist, gib nur compar aus. Sonst mache ein At aus compar und conjunct
 		Node com = compar();
-		Node con1 = conjunct1();
+		Node con1 = conjunct1(com);
 		if(con1 == null) {
 			return com;
 		}
 		else {
-			At conjunctAt = new At(com, con1);
-			return conjunctAt;
+			return con1;
 		}
 	}
 	
-	private Node conjunct1() {
+	private Node conjunct1(Node x) {
 		//Wenn das nächste token ein and ist, mache ein at aus and und compar.
 		//Wenn compar1 leer ist, gebe dieses at aus. Sonst mache ein neues at
 		//aus dem letzten at und conjunct1
@@ -315,10 +275,11 @@ public class Parser {
 		if(equalLookAhead(tokenAnd)) {
 			match(tokenAnd);
 			Node com = compar();
-			Node con1 = conjunct1();
-			At conjunct1AtAnd = new At(nodeAnd, com);
+			Node con1 = conjunct1(com);
+			At conjunct1AtAnd = new At(nodeAnd, x);
 			if(con1 == null) {
-				return conjunct1AtAnd;
+				At y = new At(conjunct1AtAnd, com);
+				return y;
 			}
 			else {
 				At conjunct1At = new At(conjunct1AtAnd, con1);
@@ -333,13 +294,12 @@ public class Parser {
 	private Node compar() {
 		//Wenn compar1 leer ist, gebe add aus. Sonst mache ein at aus add und compar1
 		Node add = add();
-		Node comp1 = compar1();
+		Node comp1 = compar1(add);
 		if(comp1 == null) {
 			return add;
 		}
 		else {
-			At comparAt = new At(add, comp1);
-			return comparAt;
+			return comp1;
 		}
 	}
 	
@@ -368,17 +328,18 @@ public class Parser {
 		}
 	}
 	
-	private Node compar1() {
+	private Node compar1(Node x) {
 		//Wenn das nächste token ein relop ist, mache eine zugehörige node.
 		//Erstelle dann ein at von der Node und add. Wenn compar1 leer ist, gebe dieses at aus
 		//Sonst mache einn neues at mit dem letzten at und compar1
 		if(isRelopToken()) {
 			Node relopNode = relop();
 			Node add = add();
-			Node comp1 = compar1();
-			At compar1RelopAt = new At(relopNode, add);
+			Node comp1 = compar1(add);
+			At compar1RelopAt = new At(relopNode, x);
 			if(comp1 == null) {
-				return compar1RelopAt;
+				At y = new At(compar1RelopAt, add);
+				return y;
 			}
 			else {
 				At compar1At = new At(compar1RelopAt, comp1);
@@ -390,7 +351,7 @@ public class Parser {
 		}
 	}
 	
-	/*
+	
 	private Node add() {
 		Node mul = mul();
 		Node add1 = add1(mul);
@@ -401,8 +362,8 @@ public class Parser {
 			return add1;
 		}
 	}
-	*/
 	
+	/*
 	private Node add() {
 		//Wenn add1 leer ist, gebe mul aus. Sonst gebe ein at aus mul und add1 zurück.
 		Node mul = mul();
@@ -413,7 +374,7 @@ public class Parser {
 		At addAt = new At(mul, add1);
 		return addAt;
 	}
-	 
+	 */
 	
 	 private boolean isAddopToken() {
 		//Überprüfe, ob das nächste token ein addop ist.
@@ -428,7 +389,6 @@ public class Parser {
 		}
 	}
 	
-	/*
 	private Node add1(Node x) {
 		if(isAddopToken()) {
 			Node addopNode = addop();
@@ -448,7 +408,7 @@ public class Parser {
 			return null;
 		}
 	}
-	*/
+	/*
 	private Node add1() {
 		//Wenn das nächste token ein addop ist, erstelle ein at aus der node von addop und mul
 		//Wenn add1 leer ist, gebe das at raus, sonst gebe ein at aus dem letzten at und add1 raus.
@@ -469,17 +429,16 @@ public class Parser {
 			return null;
 		}
 	}
-	
+	*/
 	private Node mul() {
 		//Wenn mul1 leer ist, gebe fac aus. Sonst mache ein at aus fac und mul1 und gebe dieses raus.
 		Node fac = factor();
-		Node mul1 = mul1();
+		Node mul1 = mul1(fac);
 		if(mul1 == null) {
 			return fac;
 		}
 		else {
-			At mulAt = new At(fac, mul1);
-			return mulAt;
+			return mul1;
 		}
 	}
 	
@@ -496,16 +455,17 @@ public class Parser {
 		}
 	}
 	
-	private Node mul1() {
+	private Node mul1(Node x) {
 		//wenn das nächste token ein mulop ist, mache ein at aus mulopnode unnd fac. Wenn mul1 leer ist gebe
 		//diese aus. Sonst mache ein at aus dem letzten at und mul1
 		if(isMulopToken()) {
 			Node mulopNode = mulop();
 			Node fac = factor();
-			Node mul1 = mul1();
-			At mul1MulopAt = new At(mulopNode, fac);
+			Node mul1 = mul1(fac);
+			At mul1MulopAt = new At(mulopNode, x);
 			if(mul1 == null) {
-				return mul1MulopAt;
+				At y = new At(mul1MulopAt, fac);
+				return y;
 			}
 			else {
 				At mul1At = new At(mul1MulopAt, mul1);
