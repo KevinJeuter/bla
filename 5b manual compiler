@@ -29,10 +29,3 @@ S @ (S @ (K @ equal) @ I) @ (K @ nil) @ (1:nil)
 (K)= equal @ (1:nil) @ nil
 
 = false
-
-      @
-      /\
-     /  nil
-    @
-   /  \
-equal  (1:nil)  
