@@ -37,11 +37,21 @@ public class Main {
 		
 		parser.Parser p = new parser.Parser(l);
 		
+		Def pDef = p.system();
+		
 		DotVisitor v = new DotVisitor();
 		
-		v.visit(p.system());
+		v.visit(pDef);
 		
 		System.out.println(v.getDotResult());
+		
+		compiler.Compiler c = new compiler.Compiler(pDef);
+		
+		DotVisitor v2= new DotVisitor();
+		
+		v2.visit(c.doCompile());
+		
+		System.out.println(v2.getDotResult());
 
 	}
 	

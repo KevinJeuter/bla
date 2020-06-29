@@ -78,6 +78,8 @@ public class Parser {
 	private static Node nodeMul = new Builtin(Builtin.funct.MUL);
 	private static Node nodeDiv = new Builtin(Builtin.funct.DIV);
 	
+	public static HashMap<String, Pair<ArrayList<String>, Node>> funcdefs = new HashMap<String, Pair<ArrayList<String>, Node>>();
+	
 	//Funktion zum überprüfen, ob Token_test gleich nächstes Token im Stream ist
 	private boolean equalLookAhead(Token test) {
 		return l.getLookahead().toString().equals(test.toString());
@@ -95,7 +97,6 @@ public class Parser {
 	}
 	
 	public Def system() {
-		HashMap<String, Pair<ArrayList<String>, Node>> funcdefs = new HashMap<String, Pair<ArrayList<String>, Node>>();
 		//Wenn nächstes Token = Token_Def, mache neues Def aus funcdefs und expr
 		if(equalLookAhead(def)) {
 			funcdefs = funcdefs().returnHashMap();
@@ -107,10 +108,10 @@ public class Parser {
 		//Wenn nächstes token != Token_Def mache neues Def aus empty und expr
 		else {
 			ArrayList<String> emptyList = new ArrayList<String>();
-			emptyList.add("empty");
-			StringConst emptyNode = new StringConst("empty");
+			emptyList.add("");
+			StringConst emptyNode = new StringConst("");
 			Pair<ArrayList<String>, Node> emptyPair = new Pair<ArrayList<String>, Node>(emptyList, emptyNode);
-			funcdefs.put("empty", emptyPair);
+			funcdefs.put("", emptyPair);
 			Def expr = new Def(funcdefs, expr());
 			return expr;
 		}
@@ -135,27 +136,24 @@ public class Parser {
 	}
 	
 	private DefHashMap def(DefHashMap f) {
+		//Array var, um die Variablen zu speichern
+		ArrayList<String> var = new ArrayList<String>();
 		//Fülle Hashmap.
-		f.put(name().toString(), abstraction());
+		f.put(name().toString(), abstraction(var));
 		return f;
 	}
 	
-	//Array var, um die Variablen zu speichern
-	private ArrayList<String> var = new ArrayList<String>();
-	
-	private Pair<ArrayList<String>, Node> abstraction() {
+	private Pair<ArrayList<String>, Node> abstraction(ArrayList<String> var) {
 		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
 			//Wenn ein =, dann gib das Pair von Variablen und expr aus
 			Pair<ArrayList<String>, Node> abst = new Pair<ArrayList<String>, Node>(var, expr());
-			//Leere die Liste, für das nächste mal, wenn die Funktion aufgerufen wird
-			var.clear();
 			return abst;
 		}
 		else {
 			//Füge die variablen zur liste var hinzu
 			var.add(name().toString());
-			return abstraction();
+			return abstraction(var);
 		}	
 	}
 	

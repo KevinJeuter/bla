@@ -12,6 +12,11 @@ public class BooleanConst extends Node{
 	public boolean getBoolConst() {
 		return this.bool;
 	}
+	
+	@Override
+	public String toString() {
+		return "" + this.bool + "";
+	}
 
 	@Override
 	public void accept(Visitor v) {

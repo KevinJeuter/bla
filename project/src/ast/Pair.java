@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Pair<F, S> {
     public final F first;
-    public final S second;
+    public S second;
 
     public Pair(F first, S second) {
         this.first = first;
@@ -35,6 +35,11 @@ public class Pair<F, S> {
     }
     
     public S getValue() {
+    	return this.second;
+    }
+    
+    public S setValue(S x) {
+    	this.second = x;
     	return this.second;
     }
 }

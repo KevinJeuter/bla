@@ -12,6 +12,11 @@ public class NumberConst extends Node{
 	public int getNumConst() {
 		return this.konst;
 	}
+	
+	@Override
+	public String toString() {
+		return "" + this.konst + "";
+	}
 
 	@Override
 	public void accept(Visitor v) {
