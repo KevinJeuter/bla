@@ -16,7 +16,6 @@ import ast.Builtin;
 public class Compiler {
 	
 	private Def pDef;
-	private int counter = 0;
 	Builtin S = new Builtin(Builtin.funct.S);
 	Builtin K = new Builtin(Builtin.funct.K);
 	Builtin I = new Builtin(Builtin.funct.I);
@@ -24,21 +23,23 @@ public class Compiler {
 	
 	public Compiler(Def parser) {
 		pDef = parser;
-		//Get Key at position counter (Def name)
-		String key = pDef.getDefinitions().keySet().stream().skip(counter).findFirst().get();
-		//Get Value at position counter (Def Var + Node)
-		Pair<ArrayList<String>, Node> value = pDef.getDefinitions().values().stream().skip(counter).findFirst().get();
+		for(int y = 0; y < pDef.getDefinitions().size(); y++) {
+			//Get Key at position counter (Def name)
+			String key = pDef.getDefinitions().keySet().stream().skip(y).findFirst().get();
+			//Get Value at position counter (Def Var + Node)
+			Pair<ArrayList<String>, Node> value = pDef.getDefinitions().values().stream().skip(y).findFirst().get();
 		
-		//Make array list of all variables
-		ArrayList<String> variables = value.first;
+			//Make array list of all variables
+			ArrayList<String> variables = value.first;
 		
-		//Make new Pair of variables and compiled Node
-		Pair<ArrayList<String>, Node> newDefLeftPair;
+			//Make new Pair of variables and compiled Node
+			Pair<ArrayList<String>, Node> newDefLeftPair;
 		
-		//Compile for each variable
-		for(int i = variables.size() - 1; i >= 0; i--) {
-			newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, compile(value.second, variables.get(i)));
-			newDefLeft.put(key, newDefLeftPair);
+			//Compile for each variable
+			for(int i = variables.size() - 1; i >= 0; i--) {
+				newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, compile(value.second, variables.get(i)));
+				newDefLeft.put(key, newDefLeftPair);
+			}
 		}
 	}
 	//Make new Def with newDef and original Expr
