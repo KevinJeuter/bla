@@ -18,6 +18,7 @@ import ast.Where;
 import lexer.Constants;
 import lexer.Identifier;
 import visitors.DotVisitor;
+import visitors.ReplaceVisitor;
 
 public class Main {
 
@@ -47,9 +48,11 @@ public class Main {
 		
 		compiler.Compiler c = new compiler.Compiler(pDef);
 		
-		DotVisitor v2= new DotVisitor();
+		Def cDef = c.doCompile();
 		
-		v2.visit(c.doCompile());
+		ReplaceVisitor v2= new ReplaceVisitor();
+		
+		v2.visit(cDef);
 		
 		System.out.println(v2.getDotResult());
 

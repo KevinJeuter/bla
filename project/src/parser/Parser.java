@@ -577,7 +577,7 @@ public class Parser {
 		}
 	}
 	
-	String checkID = "<ID: [a-zA-Z_][a-zA-Z_0-9]*>";
+	String checkID = "<ID: [a-zA-Z_][A-Za-z0-9_]*>";
 	String checkNumber = "<Constant num: [0-9]+>";
 	String checkBoolT = "<Constant boolean: true>";
 	String checkBoolF = "<Constant boolean: false>";

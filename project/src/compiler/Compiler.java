@@ -16,9 +16,6 @@ import ast.Builtin;
 public class Compiler {
 	
 	private Def pDef;
-	Builtin S = new Builtin(Builtin.funct.S);
-	Builtin K = new Builtin(Builtin.funct.K);
-	Builtin I = new Builtin(Builtin.funct.I);
 	HashMap<String, Pair<ArrayList<String>, Node>> newDefLeft = new HashMap<String, Pair<ArrayList<String>, Node>>();
 	
 	public Compiler(Def parser) {
@@ -35,11 +32,15 @@ public class Compiler {
 			//Make new Pair of variables and compiled Node
 			Pair<ArrayList<String>, Node> newDefLeftPair;
 		
+			Node x = abstraction(value.second, variables.get(variables.size() - 1));
+			
 			//Compile for each variable
-			for(int i = variables.size() - 1; i >= 0; i--) {
-				newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, compile(value.second, variables.get(i)));
-				newDefLeft.put(key, newDefLeftPair);
+			for(int i = variables.size() - 2; i >= 0; i--) {
+				x = abstractionParameters(x, variables.get(i));
 			}
+			
+			newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, x);
+			newDefLeft.put(key, newDefLeftPair);
 		}
 	}
 	//Make new Def with newDef and original Expr
@@ -58,32 +59,92 @@ public class Compiler {
 		return x.getClass() == Var.class;
 	}
 	
+	//Check if Node is an At
+	private boolean isAt(Node x) {
+		return x.getClass() == At.class;
+	}
+	
 	//Compile the Node
-	private Node compile(Node x, String y) {
-		if(isConst(x)) {
+	private Node abstraction(Node x, String y) {
+		//If there is an at, make a new at node with S and the abstraction of the left at and the abstraction of the right at
+		if(isAt(x)) {
+			Builtin S = new Builtin(Builtin.funct.S);
+			At z = (At) x;
+			At sAt1 = new At(S, abstraction(z.getLeft(), y));
+			At sAt2 = new At(sAt1, abstraction(z.getRight(), y));
+			return sAt2;
+		}
+		//If it is a constant, make an at with K and the constant
+		else if(isConst(x)) {
+			Builtin K = new Builtin(Builtin.funct.K);
 			At constant = new At(K, x);
 			return constant;
 		}
 		else if(isVar(x)) {
-			if(y == x.toString()) {
+			//if it is a variable, check if it is a defined method of the def node. if yes, return the node.
+			if(newDefLeft.containsKey(x.toString())) {
+				return x;
+			}
+			//If its a variable, check if the variable is the same as the parameter of the def, if yes return I otherwise return at of K and var
+			else if(y.contentEquals(x.toString())) {
+				Builtin I = new Builtin(Builtin.funct.I);
 				return I;
 			}
 			else {
+				Builtin K = new Builtin(Builtin.funct.K);
 				At varAt = new At(K, x);
 				return varAt;
 			}
 		}
 		else {
-			return I;
-			//compileAt(x) geht jedoch nicht, da wir Node haben und kein At. 
+			throw new RuntimeException("not a valid node");
 		}
 	}
 	
-	/*
-	private Node compileAt(At x) {
-		At sAt1 = new At(S, compile(x.getLeft()));
-		At sAt2 = new At(sAt1, compile(x.getRight()));
-		return sAt2;
+	//Method recursion for other parameters
+	private Node abstractionParameters(Node x, String y) {
+		if(isAt(x)) {
+			//if there is an at go through left and right node with recursion
+			At z = (At) x;
+			At newX = new At(abstractionParameters(z.getLeft(), y), abstractionParameters(z.getRight(), y));
+			return newX;
+		}
+		/* 
+		 * oder: (falls kein K mehr kommen soll) anstatt 106-111
+		 * if(isAt(x)) {
+			At z = (At) x;
+			if(z.getLeft().toString().equals(K.toString()) && z.getRight().getClass() == Var.class) {
+				return abstractionParameters(z.getRight(), y);
+			}
+			else {
+				At newX = new At(abstractionParameters(z.getLeft(), y), abstractionParameters(z.getRight(), y));
+				return newX;
+			}
+		}
+		 */
+		else if(isConst(x)) {
+			//if the node is a constant return it
+			return x;
+		}
+		else if(isVar(x)) {
+			//if it is a variable, check if it is a defined method of the def node. if yes, return the node.
+			if(newDefLeft.containsKey(x.toString())) {
+				return x;
+			}
+			else if(y.contentEquals(x.toString())) {
+				//If its a variable, check if the variable is the same as the parameter of the def, if yes return I otherwise return at of K and var
+				Builtin I = new Builtin(Builtin.funct.I);
+				return I;
+			}
+			else {		
+				Builtin K = new Builtin(Builtin.funct.K);	//**
+				At varAt = new At(K, x);					//wenn das at kommentar von zeile 110-121 stimmt, kann das hier weg
+				return varAt;								//**
+			}												//**
+		}
+		else {
+			throw new RuntimeException("not a valid node");
+		}
 	}
-	*/
+	
 }

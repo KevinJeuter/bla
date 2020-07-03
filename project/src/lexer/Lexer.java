@@ -124,7 +124,7 @@ public class Lexer {
 		String token = "";
 
 		for (int i = ptr; i < file.length(); i++) {
-			if (Character.isLetter(file.charAt(ptr))) {
+			if (Character.isLetter(file.charAt(ptr)) || file.charAt(ptr) == '_' || Character.isDigit(file.charAt(ptr))) {
 				token = token + Character.toString(file.charAt(ptr));
 				ptr++;
 			} else {

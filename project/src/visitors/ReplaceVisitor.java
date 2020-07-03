@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import ast.At;
 import ast.BooleanConst;
@@ -17,10 +17,10 @@ import ast.Pair;
 import ast.StringConst;
 import ast.Var;
 import ast.Where;
+import main.Main;
 
+public class ReplaceVisitor extends Visitor{
 
-public class DotVisitor extends Visitor {
-	
 	// counts /produces identifiers for dot nodes
 	private int counter = 0;
 	
@@ -78,26 +78,28 @@ public class DotVisitor extends Visitor {
 		printEdge(atId, leftId);
 		printEdge(atId, rightId);
 		
-		return null;
+		return n;
 	}
 
 	@Override
 	public Node visit(BooleanConst n) {
 		printNode(Boolean.toString(n.getBoolConst()));
-		return null;
+		return n;
 	}
 
 	@Override
 	public Node visit(Builtin n) {
 		printNode(n.getFunct().toString());
-		return null;
+		return n;
 	}
 
+	private HashMap<String, Pair<ArrayList<String>, Node>> defs;
+	
 	@Override
 	public Node visit(Def n) {
 		int listId = printNode("definitions");
 		
-		HashMap<String, Pair<ArrayList<String>, Node>> defs = n.getDefinitions();
+		defs = n.getDefinitions();
 		
 		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defs.entrySet();
 		Iterator<Entry<String, Pair<ArrayList<String>, Node>>> it = entrySet.iterator();
@@ -122,25 +124,31 @@ public class DotVisitor extends Visitor {
 		int defId = printNode("DEF");
 		printEdge(defId, exprId);
 		printEdge(defId, listId);
-		return null;
+		return n;
 	}
 
 	@Override
 	public Node visit(NumberConst n) {
 		printNode(Integer.toString(n.getNumConst()));
-		return null;
+		return n;
 	}
 
 	@Override
 	public Node visit(StringConst n) {
 		printNode(n.getStringConst());	
-		return null;
+		return n;
 	}
 
 	@Override
 	public Node visit(Var n) {
-		printNode("VAR: "+n.getVar());
-		return null;
+		
+		if(defs.containsKey(n.getVar())) {
+			return defs.get(n.getVar()).second;
+		}
+		else {
+			printNode(n.getVar());	
+			return n;
+		}
 	}
 
 	@Override
@@ -172,9 +180,6 @@ public class DotVisitor extends Visitor {
 		int defId = printNode("WHERE");
 		printEdge(defId, exprId);
 		printEdge(defId, listId);
-		return null;
+		return n;
 	}
-	
-	
-
 }

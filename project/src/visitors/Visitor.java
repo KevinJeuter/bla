@@ -8,19 +8,20 @@ import ast.NumberConst;
 import ast.StringConst;
 import ast.Var;
 import ast.Where;
+import ast.Node;
 
 // visitor pattern
 
 // this class is the *abstract visitor* for AST nodes
 public abstract class Visitor {
 
-	public abstract void visit(At n);
-	public abstract void visit(BooleanConst n);
-	public abstract void visit(Builtin n);
-	public abstract void visit(Def n);
-	public abstract void visit(NumberConst n);
-	public abstract void visit(StringConst n);
-	public abstract void visit(Var n);
-	public abstract void visit(Where n);
+	public abstract Node visit(At n);
+	public abstract Node visit(BooleanConst n);
+	public abstract Node visit(Builtin n);
+	public abstract Node visit(Def n);
+	public abstract Node visit(NumberConst n);
+	public abstract Node visit(StringConst n);
+	public abstract Node visit(Var n);
+	public abstract Node visit(Where n);
 
 }
