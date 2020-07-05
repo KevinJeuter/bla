@@ -23,5 +23,4 @@ public abstract class Visitor {
 	public abstract Node visit(StringConst n);
 	public abstract Node visit(Var n);
 	public abstract Node visit(Where n);
-
 }

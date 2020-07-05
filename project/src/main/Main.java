@@ -48,14 +48,21 @@ public class Main {
 		
 		compiler.Compiler c = new compiler.Compiler(pDef);
 		
-		Def cDef = c.doCompile();
+		Def cDef = c.doCompile(); //Abstraction according to David Turner
 		
-		ReplaceVisitor v2= new ReplaceVisitor();
+		ReplaceVisitor v2 = new ReplaceVisitor(cDef.getDefinitions());
 		
-		v2.visit(cDef);
+		Def newCDef = (Def) v2.visit(cDef);
 		
-		System.out.println(v2.getDotResult());
+		DotVisitor v3 = new DotVisitor();
+		
+		v3.visit(newCDef);
+		
+		System.out.println(v3.getDotResult());
+		
+		vm.VM red = new vm.VM(newCDef);
 
+		System.out.println(red.doReduce());
 	}
 	
 	private static String fileToString(String fileName) throws IOException {

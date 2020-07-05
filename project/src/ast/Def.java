@@ -28,7 +28,7 @@ public class Def extends Node{
 	}
 
 	@Override
-	public void accept(Visitor v) {
-		v.visit(this);
+	public Node accept(Visitor v) {
+		return v.visit(this);
 	}
 }

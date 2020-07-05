@@ -25,8 +25,13 @@ public class At extends Node{
 	}
 
 	@Override
-	public void accept(Visitor v) {
-		v.visit(this);
+	public Node accept(Visitor v) {
+		return v.visit(this); //vlt auf node ändern
+	}
+	
+	//Check if Node is an At
+	public static boolean isAt(Node x) {
+		return x.getClass() == At.class;
 	}
 
 }

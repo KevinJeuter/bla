@@ -70,7 +70,9 @@ public class Parser {
 	private static Node nodeCond = new Builtin(Builtin.funct.COND);
 	private static Node nodeColon = new Builtin(Builtin.funct.COLON);
 	private static Node nodePlus = new Builtin(Builtin.funct.PLUS);
+	private static Node nodePrePlus = new Builtin(Builtin.funct.prePLUS);
 	private static Node nodeMinus = new Builtin(Builtin.funct.MINUS);
+	private static Node nodePreMinus = new Builtin(Builtin.funct.preMINUS);
 	private static Node nodeHd = new Builtin(Builtin.funct.HD);
 	private static Node nodeTl = new Builtin(Builtin.funct.TL);
 	private static Node nodeNil = new Builtin(Builtin.funct.NIL);	//noch umformen
@@ -638,11 +640,11 @@ public class Parser {
 		//Überprüfe, ob token - + oder not und matche und returne dann darauf. sonst fehler
 		if(equalLookAhead(tokenMinus)) {
 			match(tokenMinus);
-			return nodeMinus;
+			return nodePreMinus;
 		}
 		else if(equalLookAhead(tokenPlus)) {
 			match(tokenPlus);
-			return nodePlus;
+			return nodePrePlus;
 		}
 		else if(equalLookAhead(tokenNot)) {
 			match(tokenNot);

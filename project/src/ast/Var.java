@@ -20,7 +20,12 @@ public class Var extends Node{
 	}
 
 	@Override
-	public void accept(Visitor v) {
-		v.visit(this);
+	public Node accept(Visitor v) {
+		return v.visit(this);
+	}
+	
+	//Check if Node is a variable
+	public static boolean isVar(Node x) {
+		return x.getClass() == Var.class;
 	}
 }
