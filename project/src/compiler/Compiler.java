@@ -72,11 +72,11 @@ public class Compiler {
 		}
 		else if(Var.isVar(x)) {
 			//if it is a variable, check if it is a defined method of the def node. if yes, return the node.
-			if(newDefLeft.containsKey(x.toString())) {
-				return x;
-			}
+			//if(newDefLeft.containsKey(x.toString())) {
+				//return x;
+			//}
 			//If its a variable, check if the variable is the same as the parameter of the def, if yes return I otherwise return at of K and var
-			else if(y.contentEquals(x.toString())) {
+			if(y.contentEquals(x.toString())) {
 				Builtin I = new Builtin(Builtin.funct.I);
 				return I;
 			}
@@ -99,17 +99,16 @@ public class Compiler {
 			At newX = new At(abstractionParameters(z.getLeft(), y), abstractionParameters(z.getRight(), y));
 			return newX;
 		}
-
 		else if(isConst(x)) {
 			//if the node is a constant return it
 			return x;
 		}
 		else if(Var.isVar(x)) {
 			//if it is a variable, check if it is a defined method of the def node. if yes, return the node.
-			if(newDefLeft.containsKey(x.toString())) {
-				return x;
-			}
-			else if(y.contentEquals(x.toString())) {
+			//if(newDefLeft.containsKey(x.toString())) {
+				//return x;
+			//}
+			if(y.contentEquals(x.toString())) {
 				//If its a variable, check if the variable is the same as the parameter of the def, if yes return I otherwise return at of K and var
 				Builtin I = new Builtin(Builtin.funct.I);
 				return I;
@@ -124,5 +123,21 @@ public class Compiler {
 			throw new RuntimeException("not a valid node");
 		}
 	}
+	
+	/*
+	private Node abstractionDefRight(Node x) {
+		if(At.isAt(x)) {
+			//if there is an at go through left and right node with recursion
+			At z = (At) x;
+			At newX = new At(abstractionDefRight(z.getLeft()), abstractionDefRight(z.getRight()));
+			return newX;
+		}
+		else if(isConst(x)) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			At result = new At(I, x);
+			return result;
+		}
+		return x;
+	}*/
 	
 }

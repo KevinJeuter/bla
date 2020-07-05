@@ -16,7 +16,7 @@ public class Constants extends Token {
 	}
 	
 	private boolean isString() {
-		if(!(konst.matches("-?\\d+")) && ((konst.toLowerCase() != "true") || (konst.toLowerCase() == "false"))) {
+		if(konst.charAt(0) == '"' && konst.charAt(konst.length() - 1) == '"') {
 			return true;
 		}
 		return false;
@@ -72,7 +72,7 @@ public class Constants extends Token {
 			return "<Constant boolean: " + this.konst.toString() + ">";
 		}
 		else if(isString()){
-			return "<Constant string: \"" + this.konst.toString() + "\">";
+			return "<Constant string: " + this.konst.toString() + ">";
 		}	
 		else {
 			throw new RuntimeException("not a constant");

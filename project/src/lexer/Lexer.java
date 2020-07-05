@@ -92,6 +92,7 @@ public class Lexer {
 		String token = "";
 
 
+		token = token + Character.toString('"');
 		ptr++;
 		for (int i = ptr; i < file.length(); i++) {
 			if (file.charAt(ptr) != '"') {
@@ -103,6 +104,7 @@ public class Lexer {
 					ptr++;
 				}
 			} else {
+				token = token + Character.toString('"');
 				ptr++;
 				break;
 			}

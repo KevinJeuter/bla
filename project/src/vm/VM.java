@@ -55,6 +55,42 @@ public class VM {
 		else if(Builtin.isPreMinus(expr)) {
 			return preMinusExpr(expr);
 		}
+		else if(Builtin.isMul(expr)) {
+			return mulExpr(expr);
+		}
+		else if(Builtin.isDiv(expr)) {
+			return divExpr(expr);
+		}
+		else if(Builtin.isNot(expr)) {
+			return notExpr(expr);
+		}
+		else if(Builtin.isCond(expr)) {
+			return condExpr(expr);
+		}
+		else if(Builtin.isAnd(expr)) {
+			return andExpr(expr);
+		}
+		else if(Builtin.isOr(expr)) {
+			return orExpr(expr);
+		}
+		else if(Builtin.isGrt(expr)) {
+			return grtExpr(expr);
+		}
+		else if(Builtin.isLes(expr)) {
+			return lesExpr(expr);
+		}
+		else if(Builtin.isEqu(expr)) {
+			return equExpr(expr);
+		}
+		else if(Builtin.isGeq(expr)) {
+			return geqExpr(expr);
+		}
+		else if(Builtin.isLeq(expr)) {
+			return leqExpr(expr);
+		}
+		else if(Builtin.isNeq(expr)) {
+			return neqExpr(expr);
+		}
 		else {
 			return expr;
 		}
@@ -94,8 +130,13 @@ public class VM {
 	private Node iExpr(Node expr) {
 		At exprAt = (At) stack.lastElement();
 		stack.pop();
+		/*
+		if(ast.At.isAt(exprAt.getRight())) {
+			At exprResultAt = (At) exprAt.getRight();
+			return reduction(exprResultAt.getLeft());
+		}*/
 		System.out.println(stack.toString());
-		return exprAt.getRight();
+		return reduction(exprAt.getRight());
 	}
 	
 	private Node plusExpr(Node expr) {
@@ -108,6 +149,7 @@ public class VM {
 		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
 		NumberConst result = new NumberConst(intX.getNumConst() + intY.getNumConst());
 		At resultAt = new At(I, result);
+		System.out.println(stack.toString());
 		return reduction(resultAt);
 	}
 	
@@ -143,5 +185,199 @@ public class VM {
 		At resultAt = new At(I, result);
 		return reduction(resultAt);
 	}
-	//bei plus fehler werfen z.b.
+	
+	private Node mulExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		Builtin I = new Builtin(Builtin.funct.I);
+		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
+		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
+		NumberConst result = new NumberConst(intX.getNumConst() * intY.getNumConst());
+		At resultAt = new At(I, result);
+		return reduction(resultAt);
+	}
+	
+	private Node divExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		Builtin I = new Builtin(Builtin.funct.I);
+		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
+		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
+		NumberConst result = new NumberConst(intX.getNumConst() / intY.getNumConst());
+		At resultAt = new At(I, result);
+		return reduction(resultAt);
+	}
+	
+	private Node notExpr(Node expr) {
+		At exprAt = (At) stack.lastElement();
+		stack.pop();
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst boolExpr = (BooleanConst) reduction(exprAt.getRight());
+		BooleanConst result = new BooleanConst(!boolExpr.getBoolConst());
+		At resultAt = new At(I, result);
+		return reduction(resultAt);
+	}
+	
+	private Node condExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		At expr3At = (At) stack.lastElement();
+		stack.pop();
+		BooleanConst boolExpr3 = (BooleanConst) reduction(expr1At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		At result;
+		if(boolExpr3.getBoolConst()) {
+			result = new At(I, reduction(expr2At.getRight()));
+		}
+		else {
+			result = new At(I, reduction(expr3At.getRight()));
+		}
+		return reduction(result);
+	}
+	
+	private Node andExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		BooleanConst boolExpr1 = (BooleanConst) reduction(expr1At.getRight());
+		BooleanConst boolExpr2 = (BooleanConst) reduction(expr2At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() && boolExpr2.getBoolConst());
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node orExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		BooleanConst boolExpr1 = (BooleanConst) reduction(expr1At.getRight());
+		BooleanConst boolExpr2 = (BooleanConst) reduction(expr2At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() || boolExpr2.getBoolConst());
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node grtExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
+		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() > numberExpr2.getNumConst());
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node lesExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
+		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() < numberExpr2.getNumConst());
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node equExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		Node expr1 = reduction(expr1At.getRight());
+		Node expr2 = reduction(expr2At.getRight());
+		if(expr1.getClass() == NumberConst.class) {
+			expr1 = (NumberConst) expr1;
+		}
+		if(expr2.getClass() == NumberConst.class) {
+			expr2 = (NumberConst) expr2;
+		}
+		if(expr1.getClass() == BooleanConst.class) {
+			expr1 = (BooleanConst) expr1;
+		}
+		if(expr2.getClass() == BooleanConst.class) {
+			expr2 = (BooleanConst) expr2;
+		}
+		if(expr1.getClass() == StringConst.class) {
+			expr1 = (StringConst) expr1;
+		}
+		if(expr2.getClass() == StringConst.class) {
+			expr2 = (StringConst) expr2;
+		}
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass()));
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node geqExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
+		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() >= numberExpr2.getNumConst());
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node leqExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
+		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() <= numberExpr2.getNumConst());
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
+	
+	private Node neqExpr(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		Node expr1 = reduction(expr1At.getRight());
+		Node expr2 = reduction(expr2At.getRight());
+		if(expr1.getClass() == NumberConst.class) {
+			expr1 = (NumberConst) expr1;
+		}
+		if(expr2.getClass() == NumberConst.class) {
+			expr2 = (NumberConst) expr2;
+		}
+		if(expr1.getClass() == BooleanConst.class) {
+			expr1 = (BooleanConst) expr1;
+		}
+		if(expr2.getClass() == BooleanConst.class) {
+			expr2 = (BooleanConst) expr2;
+		}
+		if(expr1.getClass() == StringConst.class) {
+			expr1 = (StringConst) expr1;
+		}
+		if(expr2.getClass() == StringConst.class) {
+			expr2 = (StringConst) expr2;
+		}
+		Builtin I = new Builtin(Builtin.funct.I);
+		BooleanConst resultBool = new BooleanConst(!((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass())));
+		At result = new At(I, resultBool);
+		return reduction(result);
+	}
 }
