@@ -18,24 +18,27 @@ import ast.StringConst;
 import ast.Var;
 import ast.Where;
 import main.Main;
+import parser.DefHashMap;
 
 public class ReplaceVisitor extends Visitor{
 	
-	HashMap<String, Pair<ArrayList<String>, Node>> defLeft;
+	DefHashMap defLeft;
 	
-	public ReplaceVisitor(HashMap<String, Pair<ArrayList<String>, Node>> defLeft) {
+	public ReplaceVisitor(DefHashMap defLeft) {
+		//ReplaceVisitor wird mit einem Def erstellt, bei visit(Var n) wird dann das defLeft benutzt.
 		this.defLeft = defLeft;
 	}
 	
 	@Override
 	public Node visit(At n) {
+		//Besuche linke und rechte Knoten von At und führe accept auf beide Seiten aus, wodurch jeder Knoten
+		//besucht wird.
+		Node atLeft = n.getLeft().accept(this);
 
-		Node x = n.getLeft().accept(this);
-
-		Node y = n.getRight().accept(this);
+		Node atRight = n.getRight().accept(this);
 		
-		At z = new At(x, y);
-		return z;
+		At acceptedAt = new At(atLeft, atRight);
+		return acceptedAt;
 	}
 
 	@Override
@@ -87,11 +90,12 @@ public class ReplaceVisitor extends Visitor{
 
 	@Override
 	public Node visit(Var n) {
-		if(defLeft.containsKey(n.getVar())) {
-			return defLeft.get(n.getVar()).second;
+		//ersetze die Variable durch den Node des dazugehörigen parameters. Werfe Fehler, wenn nicht existiert.
+		if(defLeft.returnHashMap().containsKey(n.getVar())) {
+			return defLeft.returnHashMap().get(n.getVar()).second;
 		}
 		else {
-			return n;
+			throw new RuntimeException(n + " is not defined.");
 		}
 	}
 	

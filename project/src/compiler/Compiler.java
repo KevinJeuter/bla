@@ -12,11 +12,12 @@ import ast.Var;
 import ast.At;
 import ast.BooleanConst;
 import ast.Builtin;
+import parser.DefHashMap;
 
 public class Compiler {
 	
 	private Def pDef;
-	HashMap<String, Pair<ArrayList<String>, Node>> newDefLeft = new HashMap<String, Pair<ArrayList<String>, Node>>();
+	DefHashMap newDefLeft = new DefHashMap();
 	
 	public Compiler(Def parser) {
 		pDef = parser;
@@ -45,7 +46,7 @@ public class Compiler {
 	}
 	//Make new Def with newDef and original Expr
 	public Def doCompile() {
-		Def x = new Def(newDefLeft, pDef.getExpr());
+		Def x = new Def(newDefLeft.returnHashMap(), pDef.getExpr());
 		return x;
 	}
 	

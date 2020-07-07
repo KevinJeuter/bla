@@ -26,7 +26,7 @@ public class VM {
 		this.defExpr = defExpr.getExpr();
 	}
 	
-	public Node doReduce() {
+	public Node reduction() {
 		return reduction(defExpr);
 	}
 	
@@ -130,11 +130,6 @@ public class VM {
 	private Node iExpr(Node expr) {
 		At exprAt = (At) stack.lastElement();
 		stack.pop();
-		/*
-		if(ast.At.isAt(exprAt.getRight())) {
-			At exprResultAt = (At) exprAt.getRight();
-			return reduction(exprResultAt.getLeft());
-		}*/
 		System.out.println(stack.toString());
 		return reduction(exprAt.getRight());
 	}
@@ -145,22 +140,35 @@ public class VM {
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
 		Builtin I = new Builtin(Builtin.funct.I);
-		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
-		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
-		NumberConst result = new NumberConst(intX.getNumConst() + intY.getNumConst());
-		At resultAt = new At(I, result);
-		System.out.println(stack.toString());
-		return reduction(resultAt);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class){
+			NumberConst intX = (NumberConst) reductionExpr1;
+			NumberConst intY = (NumberConst) reductionExpr2;
+			NumberConst result = new NumberConst(intX.getNumConst() + intY.getNumConst());
+			At resultAt = new At(I, result);
+			System.out.println(stack.toString());
+			return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("plus needs two integer arguments");
+		}
 	}
 	
 	private Node prePlusExpr(Node expr) {
 		At expr1At = (At) stack.lastElement();
 		stack.pop();
-		Builtin I = new Builtin(Builtin.funct.I);
-		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
-		NumberConst result = new NumberConst(+ intX.getNumConst());
-		At resultAt = new At(I, result);
-		return reduction(resultAt);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			NumberConst intX = (NumberConst) reductionExpr1;
+			NumberConst result = new NumberConst(+ intX.getNumConst());
+			At resultAt = new At(I, result);
+			return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("Prefix Plus needs an integer argument");
+		}
 	}
 	
 	private Node minusExpr(Node expr) {
@@ -168,22 +176,35 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		Builtin I = new Builtin(Builtin.funct.I);
-		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
-		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
-		NumberConst result = new NumberConst(intX.getNumConst() - intY.getNumConst());
-		At resultAt = new At(I, result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			NumberConst intX = (NumberConst) reductionExpr1;
+			NumberConst intY = (NumberConst) reductionExpr2;
+			NumberConst result = new NumberConst(intX.getNumConst() - intY.getNumConst());
+			At resultAt = new At(I, result);
 		return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("Minus needs an integer argument");
+		}
 	}
 	
 	private Node preMinusExpr(Node expr) {
 		At expr1At = (At) stack.lastElement();
 		stack.pop();
-		Builtin I = new Builtin(Builtin.funct.I);
-		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
-		NumberConst result = new NumberConst(- intX.getNumConst());
-		At resultAt = new At(I, result);
-		return reduction(resultAt);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			NumberConst intX = (NumberConst) reductionExpr1;
+			NumberConst result = new NumberConst(- intX.getNumConst());
+			At resultAt = new At(I, result);
+			return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("Prefix Minus needs an int argument");
+		}
 	}
 	
 	private Node mulExpr(Node expr) {
@@ -191,12 +212,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		Builtin I = new Builtin(Builtin.funct.I);
-		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
-		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
-		NumberConst result = new NumberConst(intX.getNumConst() * intY.getNumConst());
-		At resultAt = new At(I, result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			NumberConst intX = (NumberConst) reductionExpr1;
+			NumberConst intY = (NumberConst) reductionExpr2;
+			NumberConst result = new NumberConst(intX.getNumConst() * intY.getNumConst());
+			At resultAt = new At(I, result);
 		return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("Multiplication needs two int arguments");
+		}
 	}
 	
 	private Node divExpr(Node expr) {
@@ -204,22 +232,35 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		Builtin I = new Builtin(Builtin.funct.I);
-		NumberConst intX = (NumberConst) reduction(expr1At.getRight());
-		NumberConst intY = (NumberConst) reduction(expr2At.getRight());
-		NumberConst result = new NumberConst(intX.getNumConst() / intY.getNumConst());
-		At resultAt = new At(I, result);
-		return reduction(resultAt);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			NumberConst intX = (NumberConst) reductionExpr1;
+			NumberConst intY = (NumberConst) reductionExpr2;
+			NumberConst result = new NumberConst(intX.getNumConst() / intY.getNumConst());
+			At resultAt = new At(I, result);
+			return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("Division needsd two int arguments");
+		}
 	}
 	
 	private Node notExpr(Node expr) {
 		At exprAt = (At) stack.lastElement();
 		stack.pop();
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst boolExpr = (BooleanConst) reduction(exprAt.getRight());
-		BooleanConst result = new BooleanConst(!boolExpr.getBoolConst());
-		At resultAt = new At(I, result);
-		return reduction(resultAt);
+		Node reductionExpr = reduction(exprAt.getRight());
+		if(reductionExpr.getClass() == BooleanConst.class) {
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst boolExpr = (BooleanConst) reductionExpr;
+			BooleanConst result = new BooleanConst(!boolExpr.getBoolConst());
+			At resultAt = new At(I, result);
+			return reduction(resultAt);
+		}
+		else {
+			throw new RuntimeException("Not needs a boolean argument");
+		}
 	}
 	
 	private Node condExpr(Node expr) {
@@ -229,16 +270,22 @@ public class VM {
 		stack.pop();
 		At expr3At = (At) stack.lastElement();
 		stack.pop();
-		BooleanConst boolExpr3 = (BooleanConst) reduction(expr1At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		At result;
-		if(boolExpr3.getBoolConst()) {
-			result = new At(I, reduction(expr2At.getRight()));
+		Node expr1 = reduction(expr1At.getRight());
+		if(expr1.getClass() == BooleanConst.class) {
+			BooleanConst boolExpr1 = (BooleanConst) expr1;
+			Builtin I = new Builtin(Builtin.funct.I);
+			At result;
+			if(boolExpr1.getBoolConst()) {
+				result = new At(I, reduction(expr2At.getRight()));
+			}
+			else {
+				result = new At(I, reduction(expr3At.getRight()));
+			}
+			return reduction(result);
 		}
 		else {
-			result = new At(I, reduction(expr3At.getRight()));
+			throw new RuntimeException("If argument needs to be a boolean");
 		}
-		return reduction(result);
 	}
 	
 	private Node andExpr(Node expr) {
@@ -246,12 +293,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		BooleanConst boolExpr1 = (BooleanConst) reduction(expr1At.getRight());
-		BooleanConst boolExpr2 = (BooleanConst) reduction(expr2At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() && boolExpr2.getBoolConst());
-		At result = new At(I, resultBool);
-		return reduction(result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			BooleanConst boolExpr1 = (BooleanConst) reductionExpr1;
+			BooleanConst boolExpr2 = (BooleanConst) reductionExpr2;
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() && boolExpr2.getBoolConst());
+			At result = new At(I, resultBool);
+			return reduction(result);
+		}
+		else {
+			throw new RuntimeException("And needs two boolean arguments");
+		}
 	}
 	
 	private Node orExpr(Node expr) {
@@ -259,12 +313,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		BooleanConst boolExpr1 = (BooleanConst) reduction(expr1At.getRight());
-		BooleanConst boolExpr2 = (BooleanConst) reduction(expr2At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() || boolExpr2.getBoolConst());
-		At result = new At(I, resultBool);
-		return reduction(result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			BooleanConst boolExpr1 = (BooleanConst) reductionExpr1;
+			BooleanConst boolExpr2 = (BooleanConst) reductionExpr2;
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() || boolExpr2.getBoolConst());
+			At result = new At(I, resultBool);
+			return reduction(result);
+		}
+		else {
+			throw new RuntimeException("Or needs two boolean arguments");
+		}
 	}
 	
 	private Node grtExpr(Node expr) {
@@ -272,12 +333,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
-		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() > numberExpr2.getNumConst());
-		At result = new At(I, resultBool);
-		return reduction(result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
+			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() > numberExpr2.getNumConst());
+			At result = new At(I, resultBool);
+			return reduction(result);
+		}
+		else {
+			throw new RuntimeException("\">\" needs two integer arguments");
+		}
 	}
 	
 	private Node lesExpr(Node expr) {
@@ -285,12 +353,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
-		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() < numberExpr2.getNumConst());
-		At result = new At(I, resultBool);
-		return reduction(result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
+			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() < numberExpr2.getNumConst());
+			At result = new At(I, resultBool);
+			return reduction(result);
+		}
+		else {
+			throw new RuntimeException("\"<\" needs two integer arguments");
+		}
 	}
 	
 	private Node equExpr(Node expr) {
@@ -303,20 +378,23 @@ public class VM {
 		if(expr1.getClass() == NumberConst.class) {
 			expr1 = (NumberConst) expr1;
 		}
-		if(expr2.getClass() == NumberConst.class) {
+		else if(expr2.getClass() == NumberConst.class) {
 			expr2 = (NumberConst) expr2;
 		}
-		if(expr1.getClass() == BooleanConst.class) {
+		else if(expr1.getClass() == BooleanConst.class) {
 			expr1 = (BooleanConst) expr1;
 		}
-		if(expr2.getClass() == BooleanConst.class) {
+		else if(expr2.getClass() == BooleanConst.class) {
 			expr2 = (BooleanConst) expr2;
 		}
-		if(expr1.getClass() == StringConst.class) {
+		else if(expr1.getClass() == StringConst.class) {
 			expr1 = (StringConst) expr1;
 		}
-		if(expr2.getClass() == StringConst.class) {
+		else if(expr2.getClass() == StringConst.class) {
 			expr2 = (StringConst) expr2;
+		}
+		else {
+			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean or String");
 		}
 		Builtin I = new Builtin(Builtin.funct.I);
 		BooleanConst resultBool = new BooleanConst((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass()));
@@ -329,12 +407,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
-		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() >= numberExpr2.getNumConst());
-		At result = new At(I, resultBool);
-		return reduction(result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
+			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() >= numberExpr2.getNumConst());
+			At result = new At(I, resultBool);
+			return reduction(result);
+		}
+		else {
+			throw new RuntimeException("\">=\" needs two integer arguments");
+		}
 	}
 	
 	private Node leqExpr(Node expr) {
@@ -342,12 +427,19 @@ public class VM {
 		stack.pop();
 		At expr2At = (At) stack.lastElement();
 		stack.pop();
-		NumberConst numberExpr1 = (NumberConst) reduction(expr1At.getRight());
-		NumberConst numberExpr2 = (NumberConst) reduction(expr2At.getRight());
-		Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() <= numberExpr2.getNumConst());
-		At result = new At(I, resultBool);
-		return reduction(result);
+		Node reductionExpr1 = reduction(expr1At.getRight());
+		Node reductionExpr2 = reduction(expr2At.getRight());
+		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
+			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
+			Builtin I = new Builtin(Builtin.funct.I);
+			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() <= numberExpr2.getNumConst());
+			At result = new At(I, resultBool);
+			return reduction(result);
+		}
+		else {
+			throw new RuntimeException("\"<=\" needs two integer arguments");
+		}
 	}
 	
 	private Node neqExpr(Node expr) {
@@ -360,20 +452,23 @@ public class VM {
 		if(expr1.getClass() == NumberConst.class) {
 			expr1 = (NumberConst) expr1;
 		}
-		if(expr2.getClass() == NumberConst.class) {
+		else if(expr2.getClass() == NumberConst.class) {
 			expr2 = (NumberConst) expr2;
 		}
-		if(expr1.getClass() == BooleanConst.class) {
+		else if(expr1.getClass() == BooleanConst.class) {
 			expr1 = (BooleanConst) expr1;
 		}
-		if(expr2.getClass() == BooleanConst.class) {
+		else if(expr2.getClass() == BooleanConst.class) {
 			expr2 = (BooleanConst) expr2;
 		}
-		if(expr1.getClass() == StringConst.class) {
+		else if(expr1.getClass() == StringConst.class) {
 			expr1 = (StringConst) expr1;
 		}
-		if(expr2.getClass() == StringConst.class) {
+		else if(expr2.getClass() == StringConst.class) {
 			expr2 = (StringConst) expr2;
+		}
+		else {
+			throw new RuntimeException("\"~=\" needs two arguments of the type Integer, Boolean or String");
 		}
 		Builtin I = new Builtin(Builtin.funct.I);
 		BooleanConst resultBool = new BooleanConst(!((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass())));

@@ -19,6 +19,7 @@ import lexer.Constants;
 import lexer.Identifier;
 import visitors.DotVisitor;
 import visitors.ReplaceVisitor;
+import parser.DefHashMap;
 
 public class Main {
 
@@ -32,37 +33,39 @@ public class Main {
 			throw new RuntimeException("No file selected.");
 		}
 		
-		String src = fileToString(args[0]);
+		String src = fileToString(args[0]); //Eingabeprogramm
 		
-		lexer.Lexer l = new lexer.Lexer(src);
+		lexer.Lexer l = new lexer.Lexer(src); //Lexe das Eingabeprogramm
 		
-		parser.Parser p = new parser.Parser(l);
+		parser.Parser p = new parser.Parser(l); //Parse das gelexte Programm
 		
-		Def pDef = p.system();
+		Def pDef = p.system();	//p.system() erzeugt einen Def Knoten aus dem Programm
 		
 		DotVisitor v = new DotVisitor();
 		
 		v.visit(pDef);
 		
-		System.out.println(v.getDotResult());
+		System.out.println(v.getDotResult()); //printe den erzeugten Baum vom Parser
 		
-		compiler.Compiler c = new compiler.Compiler(pDef);
+		compiler.Compiler c = new compiler.Compiler(pDef); //Kompiliere das erzeugte Def von p.system()
 		
-		Def cDef = c.doCompile(); //Abstraction according to David Turner
+		Def cDef = c.doCompile(); //Abstraktion nach David Turner
 		
-		ReplaceVisitor v2 = new ReplaceVisitor(cDef.getDefinitions());
+		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions()); //Mache ein DefHashMap aus der Abstr.
 		
-		Def newCDef = (Def) v2.visit(cDef);
+		ReplaceVisitor v2 = new ReplaceVisitor(cDefDefinitions); //Ersetze die Parameter durch die Nodes
+		
+		Def newCDef = (Def) v2.visit(cDef); 
 		
 		DotVisitor v3 = new DotVisitor();
 		
 		v3.visit(newCDef);
 		
-		System.out.println(v3.getDotResult());
+		System.out.println(v3.getDotResult()); //printe den erzeugten Baum vom Kompilierer
 		
-		vm.VM red = new vm.VM(newCDef);
+		vm.VM reductionOfCompilerDef = new vm.VM(newCDef); //Füge das kompilierte Programm in die Reduktionsmaschine
 
-		System.out.println(red.doReduce());
+		System.out.println(reductionOfCompilerDef.reduction()); //Reduziere das Programm und printe das Ergebnis
 	}
 	
 	private static String fileToString(String fileName) throws IOException {
