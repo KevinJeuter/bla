@@ -15,7 +15,7 @@
         <mkdir dir="build/jar"/>
         <jar destfile="build/jar/sasl.jar" basedir="build/classes">
             <manifest>
-                <attribute name="Main-Class" value="lexer.Main"/>
+                <attribute name="Main-Class" value="main.Main"/>
             </manifest>
         </jar>
     </target>
