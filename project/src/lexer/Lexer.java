@@ -30,8 +30,12 @@ public class Lexer {
 				skipComment(src);
 			}
 
-			else if (isWhitespace(src.charAt(ptr)) || isTab(src.charAt(ptr)) || isNewLine(src)) {
+			else if (isEmptyLine(src.charAt(ptr)) || isTab(src.charAt(ptr))) {
 				skipWhitespace();
+			}
+			
+			else if(isNewLine(src)) {
+				//isNewLine ueberspringt auch newLines
 			}
 
 			else if (Character.isDigit(src.charAt(ptr))) {
@@ -197,7 +201,7 @@ public class Lexer {
 		ptr++;
 	}
 
-	private static boolean isWhitespace(char test) {
+	private static boolean isEmptyLine(char test) {
 		return test == ' ';
 	}
 	
@@ -216,9 +220,7 @@ public class Lexer {
 			for (int i = ptr; i < test.length(); i++) {
 				if ((test.charAt(i) == '\n' || test.charAt(i) == '\r') && newLine.length() < 2) {
 					newLine = newLine + Character.toString(test.charAt(i));
-					if(test.charAt(i+1) == '\n') {
-						ptr++;
-					}
+					ptr++;
 				} else {
 					break;
 				}
@@ -230,6 +232,7 @@ public class Lexer {
 			for (int i = ptr; i < test.length(); i++) {
 				if (test.charAt(i) == '\n' && newLine.length() < 1) {
 					newLine = newLine + Character.toString(test.charAt(i));
+					ptr++;
 				} else {
 					break;
 				}
