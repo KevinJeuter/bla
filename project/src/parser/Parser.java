@@ -473,13 +473,12 @@ public class Parser {
 	private Node comb() {
 		//Wenn comb1 leer ist, returne simple. Sonst mache ein at aus simple und comb1 und gebe dieses zurück.
 		Node simple = simple();
-		Node comb1 = comb1();
+		Node comb1 = comb1(simple);
 		if(comb1 == null) {
 			return simple;
 		}
 		else {
-			At result = new At(simple, comb1);
-			return result;
+			return comb1;
 		}
 	}
 	
@@ -508,19 +507,19 @@ public class Parser {
 		return equalLookAhead(tokenNil);
 	}
 	
-	private Node comb1() {
+	private Node comb1(Node x) {
 		//wenn comb1 ein identifier, hd or tl, eine konstante oder eine offene klammer ist
 		//gebe entweder simple zurück(wenn das nächste comb1 empty ist) odedr ein at von simple und comb1 zurück
 		//(wenn das nächste token wieder ein comb1 ist). Sonst null.
 		if(isIdClass() || isHdOrTl() || isConstantClass() || isNil() || isParenl()) {
-			Node simple = simple();
-			Node comb1 = comb1();
+			Node simp = simple();
+			At w = new At(x, simp);
+			Node comb1 = comb1(w);
 			if(comb1 == null) {
-				return simple;
+				return w;
 			}
 			else {
-				At result = new At(simple, comb1);
-				return result;
+				return comb1;
 			}
 		}
 		

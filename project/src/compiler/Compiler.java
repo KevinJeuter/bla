@@ -36,7 +36,7 @@ public class Compiler {
 			Node x = value.second;
 			
 			//Compile for each variable
-			for(int i = 0; i <= variables.size() - 1; i++) {
+			for(int i = variables.size() - 1; i >= 0 ; i--) {
 				x = abstraction(x, variables.get(i));
 			}
 			
