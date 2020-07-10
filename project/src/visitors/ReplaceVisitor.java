@@ -66,9 +66,9 @@ public class ReplaceVisitor extends Visitor{
 	
 	@Override
 	public Node visit(Def n) {
-		HashMap<String, Pair<ArrayList<String>, Node>> defs = n.getDefinitions();
+		DefHashMap defs = new DefHashMap(n.getDefinitions());
 		
-		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defs.entrySet();
+		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defs.returnHashMap().entrySet();
 		Iterator<Entry<String, Pair<ArrayList<String>, Node>>> it = entrySet.iterator();
 		
 		int i = 0;
@@ -76,19 +76,17 @@ public class ReplaceVisitor extends Visitor{
 		while(it.hasNext()) {
 			Map.Entry me = (Map.Entry) it.next();
 			Pair<ArrayList<String>, Node> value = (Pair<ArrayList<String>, Node>) me.getValue();
-			
 			Pair<ArrayList<String>, Node> value2 = new Pair<ArrayList<String>, Node>(value.first, value.getValue().accept(this));
 			
-			defs.replace((String) defs.keySet().toArray()[i], value2);
+			defs.returnHashMap().replace((String) defs.returnHashMap().keySet().toArray()[i], value2);
 			i++;
 		}
 		
 		Node y = n.getExpr().accept(this);
 		
-		Def x = new Def(defs, y);
+		Def x = new Def(defs.returnHashMap(), y);
 		
 		return x;
-		
 	}
 
 	@Override

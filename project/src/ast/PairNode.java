@@ -21,7 +21,7 @@ public class PairNode extends Node{
 	}
 	
 	public String toString() {
-		return this.left.toString() + ", " + this.right.toString();
+		return "(" + this.left.toString() + ": " + this.right.toString() + ")";
 	}
 
 	@Override
