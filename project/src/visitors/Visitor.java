@@ -9,6 +9,7 @@ import ast.StringConst;
 import ast.Var;
 import ast.Where;
 import ast.Node;
+import ast.PairNode;
 
 // visitor pattern
 
@@ -23,4 +24,5 @@ public abstract class Visitor {
 	public abstract Node visit(StringConst n);
 	public abstract Node visit(Var n);
 	public abstract Node visit(Where n);
+	public abstract Node visit(PairNode n);
 }

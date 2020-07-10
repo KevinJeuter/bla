@@ -1,19 +1,15 @@
 package vm;
 
-import java.util.ArrayList;
 import java.util.Stack;
 
 import ast.At;
 import ast.BooleanConst;
 import ast.Builtin;
-import ast.Builtin.funct;
 import ast.Def;
 import ast.Node;
 import ast.NumberConst;
-import ast.Pair;
 import ast.StringConst;
-import ast.Var;
-import compiler.Compiler;
+import ast.PairNode;
 
 public class VM {
 	
@@ -24,6 +20,29 @@ public class VM {
 	public VM(Def defExpr) {
 		
 		this.defExpr = defExpr.getExpr();
+	}
+	
+	private boolean isConstant(Node x) {
+		return ((x.getClass() == BooleanConst.class) || (x.getClass() == StringConst.class) || (x.getClass() == NumberConst.class));
+	}
+
+	public String print() {
+		Node result = reduction();
+		if(isConstant(result)) {
+			return result.toString();
+		}
+		else if(PairNode.isPair(result)) {
+			return "[" + removeNil(result) + "]";
+		}
+		else {
+			throw new RuntimeException("The result is not a printable object. (No constant, nor a pair)");
+		}
+	}
+	
+	private String removeNil(Node list) {
+		String newList = list.toString().replaceAll(", NIL", "");
+		newList = newList.toString().replaceAll("NIL", "");
+		return newList;
 	}
 	
 	public Node reduction() {
@@ -91,6 +110,12 @@ public class VM {
 		else if(Builtin.isNeq(expr)) {
 			return neqExpr(expr);
 		}
+		else if(Builtin.isColon(expr)) {
+			return pair(expr);
+		}
+		else if(Builtin.isHd(expr) || Builtin.isTl(expr)) {
+			return headOrTail(expr);
+		}
 		else {
 			return expr;
 		}
@@ -99,7 +124,6 @@ public class VM {
 	private Node atExpr(Node expr) {
 		At exprAt = (At) expr;
 		stack.push(exprAt);
-		System.out.println(stack.toString());
 		return reduction(exprAt.getLeft());
 	}
 	
@@ -113,7 +137,6 @@ public class VM {
 		At fExpr = new At(f.getRight(), x.getRight());
 		At gExpr = new At(g.getRight(), x.getRight());
 		At result = new At(fExpr, gExpr);
-		System.out.println(stack.toString());
 		return reduction(result);
 	}
 	
@@ -123,14 +146,12 @@ public class VM {
 		stack.pop();
 		Builtin I = new Builtin(Builtin.funct.I);
 		At result = new At(I, reduction(exprAt.getRight()));
-		System.out.println(stack.toString());
 		return reduction(result);
 	}
 	
 	private Node iExpr(Node expr) {
 		At exprAt = (At) stack.lastElement();
 		stack.pop();
-		System.out.println(stack.toString());
 		return reduction(exprAt.getRight());
 	}
 	
@@ -147,7 +168,6 @@ public class VM {
 			NumberConst intY = (NumberConst) reductionExpr2;
 			NumberConst result = new NumberConst(intX.getNumConst() + intY.getNumConst());
 			At resultAt = new At(I, result);
-			System.out.println(stack.toString());
 			return reduction(resultAt);
 		}
 		else {
@@ -474,5 +494,74 @@ public class VM {
 		BooleanConst resultBool = new BooleanConst(!((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass())));
 		At result = new At(I, resultBool);
 		return reduction(result);
+	}
+	
+	private Node pair(Node expr) {
+		At expr1At = (At) stack.lastElement();
+		stack.pop();
+		At expr2At = (At) stack.lastElement();
+		stack.pop();
+		Node expr1 = reduction(expr1At.getRight());
+		Node expr2 = reduction(expr2At.getRight());
+		PairNode resultPair = new PairNode(expr1, expr2);
+		Builtin I = new Builtin(Builtin.funct.I);
+		At result = new At(I, resultPair);
+		return reduction(result);
+	}
+	
+	private Node headOrTail(Node expr) {
+		At exprAt = (At) stack.lastElement();
+		stack.pop();
+		Node result;
+		PairNode resultPair = new PairNode(exprAt.getLeft(), exprAt.getRight());
+		if(Builtin.isHd(exprAt.getLeft())) {
+			result = headReduction(resultPair);
+		}
+		else{
+			result = tailReduction(resultPair);
+		}
+		return result;
+	}
+	
+	private Node headReduction(PairNode toReduce){
+		if(toReduce.getRight().getClass() == At.class) {
+			At listRight = (At) toReduce.getRight();
+			Node result = reduction(listRight);
+			if(PairNode.isPair(result)) {
+				PairNode resultPair = (PairNode) result;
+				result = resultPair.getLeft();
+				return result;
+			}
+			else {
+				throw new RuntimeException("\"hd\" only works on lists.");
+			}
+		}
+		else if(Builtin.isNil(toReduce.getRight())){
+			throw new RuntimeException("An empty list has no hd elements.");
+		}
+		else {
+			throw new RuntimeException("\"hd\" only works on lists.");
+		}
+	}
+
+	private Node tailReduction(PairNode toReduce) {
+		if(toReduce.getRight().getClass() == At.class) {
+			At listRight = (At) toReduce.getRight();
+			Node result = reduction(listRight);
+			if(PairNode.isPair(result)) {
+				PairNode resultPair = (PairNode) result;
+				result = resultPair.getRight();
+				return result;
+			}
+			else {
+				throw new RuntimeException("\"tl\" only works on lists.");
+			}
+		}
+		else if(Builtin.isNil(toReduce.getRight())){
+			throw new RuntimeException("An empty list has no tl elements.");
+		}
+		else {
+			throw new RuntimeException("\"tl\" only works on lists.");
+		}
 	}
 }

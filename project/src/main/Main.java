@@ -25,10 +25,6 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		
-//		NumberConst x1 = new NumberConst(1);
-//		NumberConst x41 = new NumberConst(41);
-//		At root = new At(x1, x41);
-		
 		if(args.length <= 0) {
 			throw new RuntimeException("No file selected.");
 		}
@@ -65,7 +61,8 @@ public class Main {
 		
 		vm.VM reductionOfCompilerDef = new vm.VM(newCDef); //Füge das kompilierte Programm in die Reduktionsmaschine
 
-		System.out.println(reductionOfCompilerDef.reduction()); //Reduziere das Programm und printe das Ergebnis
+		System.out.println(reductionOfCompilerDef.print()); //Reduziere das Programm und printe das Ergebnis
+		
 	}
 	
 	private static String fileToString(String fileName) throws IOException {

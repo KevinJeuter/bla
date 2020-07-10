@@ -50,6 +50,10 @@ public class Lexer {
 			else if (Symbols.isSymbol(src.charAt(ptr))) {
 				lexSymbol(src);
 			}
+			
+			else if(src.charAt(ptr) == '[') {
+				throw new RuntimeException("Lists in the form of \"[x:y:z]\" are not implemented. Try \"(x:y:z:nil)\" instead.");
+			}
 
 			else {
 				throw new RuntimeException("there is a non-valid token");
@@ -206,15 +210,33 @@ public class Lexer {
 		
 		String newLine = "";
 		
-		for (int i = ptr; i < test.length(); i++) {
-			if (test.charAt(i) == '\n' || test.charAt(i) == '\r') {
-				newLine = newLine + Character.toString(test.charAt(i));
-
-			} else {
-				break;
+		if(test.charAt(ptr) == '\r') {
+			//Windows, DOS, OS/2, CP/M, TOS (Atari)
+			//Mac OS Classic, Apple II, C64
+			for (int i = ptr; i < test.length(); i++) {
+				if ((test.charAt(i) == '\n' || test.charAt(i) == '\r') && newLine.length() < 2) {
+					newLine = newLine + Character.toString(test.charAt(i));
+					if(test.charAt(i+1) == '\n') {
+						ptr++;
+					}
+				} else {
+					break;
+				}
 			}
 		}
-		if(newLine.equals("\n") || newLine.equals("\r\n") || newLine.equals("\r") || newLine.equals("\n\r")) {
+		
+		else if(test.charAt(ptr) == '\n') {
+			//Unix, Linux, Android, macOS, AmigaOS, BSD, weitere
+			for (int i = ptr; i < test.length(); i++) {
+				if (test.charAt(i) == '\n' && newLine.length() < 1) {
+					newLine = newLine + Character.toString(test.charAt(i));
+				} else {
+					break;
+				}
+			}
+		}
+		
+		if(newLine.equals("\n") || newLine.equals("\r\n") || newLine.equals("\r")) {
 			return true;
 		}
 		else {

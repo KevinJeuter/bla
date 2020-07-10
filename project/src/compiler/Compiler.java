@@ -33,11 +33,11 @@ public class Compiler {
 			//Make new Pair of variables and compiled Node
 			Pair<ArrayList<String>, Node> newDefLeftPair;
 		
-			Node x = abstraction(value.second, variables.get(variables.size() - 1));
+			Node x = value.second;
 			
 			//Compile for each variable
-			for(int i = variables.size() - 2; i >= 0; i--) {
-				x = abstractionParameters(x, variables.get(i));
+			for(int i = 0; i <= variables.size() - 1; i++) {
+				x = abstraction(x, variables.get(i));
 			}
 			
 			newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, x);
@@ -86,39 +86,6 @@ public class Compiler {
 				At varAt = new At(K, x);
 				return varAt;
 			}
-		}
-		else {
-			throw new RuntimeException("not a valid node");
-		}
-	}
-	
-	//Method recursion for other parameters
-	private Node abstractionParameters(Node x, String y) {
-		if(At.isAt(x)) {
-			//if there is an at go through left and right node with recursion
-			At z = (At) x;
-			At newX = new At(abstractionParameters(z.getLeft(), y), abstractionParameters(z.getRight(), y));
-			return newX;
-		}
-		else if(isConst(x)) {
-			//if the node is a constant return it
-			return x;
-		}
-		else if(Var.isVar(x)) {
-			//if it is a variable, check if it is a defined method of the def node. if yes, return the node.
-			//if(newDefLeft.containsKey(x.toString())) {
-				//return x;
-			//}
-			if(y.contentEquals(x.toString())) {
-				//If its a variable, check if the variable is the same as the parameter of the def, if yes return I otherwise return at of K and var
-				Builtin I = new Builtin(Builtin.funct.I);
-				return I;
-			}
-			else {		
-				Builtin K = new Builtin(Builtin.funct.K);
-				At varAt = new At(K, x);					
-				return varAt;								
-			}												
 		}
 		else {
 			throw new RuntimeException("not a valid node");

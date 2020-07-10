@@ -16,6 +16,7 @@ import ast.NumberConst;
 import ast.Pair;
 import ast.StringConst;
 import ast.Var;
+import ast.PairNode;
 import ast.Where;
 import main.Main;
 import parser.DefHashMap;
@@ -39,6 +40,18 @@ public class ReplaceVisitor extends Visitor{
 		
 		At acceptedAt = new At(atLeft, atRight);
 		return acceptedAt;
+	}
+	
+	@Override
+	public Node visit(PairNode n) {
+		//Besuche linke und rechte Knoten von At und führe accept auf beide Seiten aus, wodurch jeder Knoten
+		//besucht wird.
+		Node pairLeft = n.getLeft().accept(this);
+
+		Node pairRight = n.getRight().accept(this);
+		
+		PairNode acceptedPair = new PairNode(pairLeft, pairRight);
+		return acceptedPair;
 	}
 
 	@Override

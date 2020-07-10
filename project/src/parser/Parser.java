@@ -110,10 +110,10 @@ public class Parser {
 		//Wenn nächstes token != Token_Def mache neues Def aus empty und expr
 		else {
 			ArrayList<String> emptyList = new ArrayList<String>();
-			emptyList.add("");
-			StringConst emptyNode = new StringConst("");
+			emptyList.add("empty");
+			StringConst emptyNode = new StringConst("empty");
 			Pair<ArrayList<String>, Node> emptyPair = new Pair<ArrayList<String>, Node>(emptyList, emptyNode);
-			funcdefs.put("", emptyPair);
+			funcdefs.put("empty", emptyPair);
 			Def expr = new Def(funcdefs, expr());
 			return expr;
 		}
@@ -365,10 +365,7 @@ public class Parser {
 	
 	 private boolean isAddopToken() {
 		//Überprüfe, ob das nächste token ein addop ist.
-		if(equalLookAhead(tokenPlus)) {
-			return true;
-		}
-		else if(equalLookAhead(tokenMinus)) {
+		if(equalLookAhead(tokenPlus) || equalLookAhead(tokenMinus)) {
 			return true;
 		}
 		else {
@@ -481,8 +478,8 @@ public class Parser {
 			return simple;
 		}
 		else {
-			At combAt = new At(simple, comb1);
-			return combAt;
+			At result = new At(simple, comb1);
+			return result;
 		}
 	}
 	
@@ -516,14 +513,14 @@ public class Parser {
 		//gebe entweder simple zurück(wenn das nächste comb1 empty ist) odedr ein at von simple und comb1 zurück
 		//(wenn das nächste token wieder ein comb1 ist). Sonst null.
 		if(isIdClass() || isHdOrTl() || isConstantClass() || isNil() || isParenl()) {
-			Node simp = simple();
+			Node simple = simple();
 			Node comb1 = comb1();
 			if(comb1 == null) {
-				return simp;
+				return simple;
 			}
 			else {
-				At comb1At = new At(simp, comb1);
-				return comb1At;
+				At result = new At(simple, comb1);
+				return result;
 			}
 		}
 		

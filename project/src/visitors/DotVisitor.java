@@ -17,6 +17,7 @@ import ast.Pair;
 import ast.StringConst;
 import ast.Var;
 import ast.Where;
+import ast.PairNode;
 
 
 public class DotVisitor extends Visitor {
@@ -77,6 +78,27 @@ public class DotVisitor extends Visitor {
 		// print edges
 		printEdge(atId, leftId);
 		printEdge(atId, rightId);
+		
+		return null;
+	}
+	
+	@Override
+	public Node visit(PairNode n) {
+		// print left node
+		n.getLeft().accept(this);
+		int leftId = getPreviousId();
+		
+		// print right node
+		n.getRight().accept(this);
+		int rightId = getPreviousId();
+		
+		// print this node
+		printNode("pair");
+		int pairId = getPreviousId();
+		
+		// print edges
+		printEdge(pairId, leftId);
+		printEdge(pairId, rightId);
 		
 		return null;
 	}
