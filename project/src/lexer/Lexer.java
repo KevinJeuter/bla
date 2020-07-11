@@ -5,15 +5,12 @@ import java.util.ArrayList;
 import lexer.Token;
 
 public class Lexer {
-	
-	
-	//BUG: Wenn es kein Comment gibt, gibt es einen Fehler, wenn eine neue Zeile begonnen wird.
 
 	// point to current character
-	private static int ptr = 0;
+	private int ptr = 0;
 
 	// store the final tokens
-	private static ArrayList<Token> tokens = new ArrayList<Token>();
+	private ArrayList<Token> tokens = new ArrayList<Token>();
 
 	public Lexer(String file){
 		
@@ -68,7 +65,7 @@ public class Lexer {
 		
 	}
 
-	private static void lexDigit(String file) {
+	private void lexDigit(String file) {
 
 		// continue with lexing until NOT digit
 		// -> end pointer
@@ -91,7 +88,7 @@ public class Lexer {
 
 	}
 
-	private static void lexConstString(String file) { // unsicher, da ich nicht wusste wie nachprüfen
+	private void lexConstString(String file) { // unsicher, da ich nicht wusste wie nachprüfen
 
 		// continue with lexing until '"'
 		// -> end pointer
@@ -124,7 +121,7 @@ public class Lexer {
 
 	}
 
-	private static void lexWord(String file) {
+	private void lexWord(String file) {
 
 		// continue with lexing until NOT word
 		// -> end pointer
@@ -160,7 +157,7 @@ public class Lexer {
 			}
 	}
 
-	private static void lexSymbol(String file) {
+	private void lexSymbol(String file) {
 
 		// continue with lexing until NOT symbol
 		// -> end pointer
@@ -187,7 +184,7 @@ public class Lexer {
 		
 	}
 
-	private static void lexSpecial() {
+	private void lexSpecial() {
 
 		Specials spec = new Specials("eof");
 
@@ -197,21 +194,19 @@ public class Lexer {
 
 	}
 	
-	private static void skipWhitespace() {
+	private void skipWhitespace() {
 		ptr++;
 	}
 
-	private static boolean isEmptyLine(char test) {
+	private boolean isEmptyLine(char test) {
 		return test == ' ';
 	}
 	
-	private static boolean isTab(char test) {
+	private boolean isTab(char test) {
 		return test == '\t';
 	}
 	
-	private static boolean isNewLine(String test) {
-		//return test == '\n'; //windows \r\n , sonst \r
-		
+	private boolean isNewLine(String test) {
 		String newLine = "";
 		
 		if(test.charAt(ptr) == '\r') {
@@ -247,11 +242,11 @@ public class Lexer {
 		}
 	}
 	
-	private static boolean isComment(String file) {
+	private boolean isComment(String file) {
 		return (ptr < file.length() && file.charAt(ptr) == '|' && file.charAt(ptr + 1) == '|');
 	}
 	
-	private static void skipComment(String file) {
+	private void skipComment(String file) {
 		for(int i = ptr; i < file.length(); i++) {
 			if(!isNewLine(file)) {
 				ptr++;
@@ -262,13 +257,13 @@ public class Lexer {
 		}
 	}
 
-	private static void printTokenList() { 	//toString
+	private void printTokenList() { 	//toString
 		for (Token i : tokens) {
 			System.out.println(i);
 		}
 	}
 	
-	public static ArrayList<Token> getTokens() {
+	public ArrayList<Token> getTokens() {
 		return tokens;
 	}
 	

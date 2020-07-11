@@ -26,6 +26,11 @@ public class Def extends Node{
 	public Node getExpr() {
 		return right;
 	}
+	
+	@Override
+	public String toString() {
+		return left.toString() + " DEF " + right.toString();
+	}
 
 	@Override
 	public Node accept(Visitor v) {

@@ -139,7 +139,6 @@ public class VM {
 	private Node atExpr(Node expr) {
 		At exprAt = (At) expr;
 		stack.push(exprAt);
-		System.out.println(stack);
 		return reduction(exprAt.getLeft());
 	}
 	

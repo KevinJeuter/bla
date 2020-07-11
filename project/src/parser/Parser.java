@@ -29,9 +29,6 @@ public class Parser {
 	public Parser(Lexer l) {
 		this.l = l;
 	}
-	//nicht 2 mal expr(), wenn dann mit variable
-	
-	//expr(), condexpr(), listexpr() bringt die tokens dazwischen als node
 	
 	private static Keywords tokenNil = new Keywords("nil");
 	private static Keywords tokenHd = new Keywords("hd");
@@ -50,7 +47,6 @@ public class Parser {
 	private static Symbols tokenGrt = new Symbols(">");
 	private static Symbols tokenLes = new Symbols("<");
 	private static Symbols tokenColon = new Symbols(":");
-	private static Symbols tokenSemicolon = new Symbols(";");
 	private static Symbols dot = new Symbols(".");
 	private static Symbols tokenPlus = new Symbols("+");
 	private static Symbols tokenMinus = new Symbols("-");
@@ -75,7 +71,7 @@ public class Parser {
 	private static Node nodePreMinus = new Builtin(Builtin.funct.preMINUS);
 	private static Node nodeHd = new Builtin(Builtin.funct.HD);
 	private static Node nodeTl = new Builtin(Builtin.funct.TL);
-	private static Node nodeNil = new Builtin(Builtin.funct.NIL);	//noch umformen
+	private static Node nodeNil = new Builtin(Builtin.funct.NIL);
 	private static Node nodeNot = new Builtin(Builtin.funct.NOT);
 	private static Node nodeMul = new Builtin(Builtin.funct.MUL);
 	private static Node nodeDiv = new Builtin(Builtin.funct.DIV);
@@ -550,6 +546,10 @@ public class Parser {
 			Node simpleExpr = expr();
 			match(tokenParenr);
 			return simpleExpr;
+		}
+		
+		else if(l.getLookahead().getClass() == Specials.class) {
+			throw new RuntimeException("File is empty");
 		}
 		
 		else {

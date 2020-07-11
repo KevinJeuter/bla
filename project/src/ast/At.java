@@ -26,7 +26,7 @@ public class At extends Node{
 
 	@Override
 	public Node accept(Visitor v) {
-		return v.visit(this); //vlt auf node ändern
+		return v.visit(this);
 	}
 	
 	//Check if Node is an At
