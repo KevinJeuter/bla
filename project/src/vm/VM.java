@@ -31,9 +31,12 @@ public class VM {
 		if(isConstant(result)) {
 			return result.toString();
 		}
+		else if(Builtin.isNil(result)) {
+			return "(" + result.toString() + ")";
+		}
 		else if(PairNode.isPair(result)) {
 			PairNode resultPair = (PairNode) result;
-			errorNoNil(resultPair);
+			//errorNoNil(resultPair);
 			return result.toString();
 		}
 		else {
@@ -143,12 +146,10 @@ public class VM {
 	}
 	
 	private Node sExpr() {
-		At f = (At) stack.lastElement();
-		stack.pop();
-		At g = (At) stack.lastElement();
-		stack.pop();
-		At x = (At) stack.lastElement();
-		stack.pop();
+		At f = (At) stack.pop();
+		At g = (At) stack.pop();
+		At x = (At) stack.pop();
+		
 		At fExpr = new At(f.getRight(), x.getRight());
 		At gExpr = new At(g.getRight(), x.getRight());
 		At result = new At(fExpr, gExpr);
@@ -156,8 +157,7 @@ public class VM {
 	}
 	
 	private Node kExpr() {
-		At exprAt = (At) stack.lastElement();
-		stack.pop();
+		At exprAt = (At) stack.pop();
 		stack.pop();
 		//Builtin I = new Builtin(Builtin.funct.I);
 		//At result = new At(I, reduction(exprAt.getRight()));
@@ -165,16 +165,13 @@ public class VM {
 	}
 	
 	private Node iExpr() {
-		At exprAt = (At) stack.lastElement();
-		stack.pop();
+		At exprAt = (At) stack.pop();
 		return reduction(exprAt.getRight());
 	}
 	
 	private Node plusExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		//Builtin I = new Builtin(Builtin.funct.I);
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
@@ -191,8 +188,7 @@ public class VM {
 	}
 	
 	private Node prePlusExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class) {
 			//Builtin I = new Builtin(Builtin.funct.I);
@@ -207,10 +203,8 @@ public class VM {
 	}
 	
 	private Node minusExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -227,8 +221,7 @@ public class VM {
 	}
 	
 	private Node preMinusExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class) {
 			//Builtin I = new Builtin(Builtin.funct.I);
@@ -243,10 +236,8 @@ public class VM {
 	}
 	
 	private Node mulExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -263,10 +254,8 @@ public class VM {
 	}
 	
 	private Node divExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -283,8 +272,7 @@ public class VM {
 	}
 	
 	private Node notExpr() {
-		At exprAt = (At) stack.lastElement();
-		stack.pop();
+		At exprAt = (At) stack.pop();
 		Node reductionExpr = reduction(exprAt.getRight());
 		if(reductionExpr.getClass() == BooleanConst.class) {
 			//Builtin I = new Builtin(Builtin.funct.I);
@@ -299,12 +287,9 @@ public class VM {
 	}
 	
 	private Node condExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
-		At expr3At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
+		At expr3At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
 		if(expr1.getClass() == BooleanConst.class) {
 			BooleanConst boolExpr1 = (BooleanConst) expr1;
@@ -326,13 +311,11 @@ public class VM {
 	}
 	
 	private Node andExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
-		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+		if(reductionExpr1.getClass() == BooleanConst.class && reductionExpr2.getClass() == BooleanConst.class) {
 			BooleanConst boolExpr1 = (BooleanConst) reductionExpr1;
 			BooleanConst boolExpr2 = (BooleanConst) reductionExpr2;
 			//Builtin I = new Builtin(Builtin.funct.I);
@@ -346,13 +329,11 @@ public class VM {
 	}
 	
 	private Node orExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
-		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
+		if(reductionExpr1.getClass() == BooleanConst.class && reductionExpr2.getClass() == BooleanConst.class) {
 			BooleanConst boolExpr1 = (BooleanConst) reductionExpr1;
 			BooleanConst boolExpr2 = (BooleanConst) reductionExpr2;
 			//Builtin I = new Builtin(Builtin.funct.I);
@@ -366,10 +347,8 @@ public class VM {
 	}
 	
 	private Node grtExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -386,10 +365,8 @@ public class VM {
 	}
 	
 	private Node lesExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -406,10 +383,8 @@ public class VM {
 	}
 	
 	private Node equExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
 		Node expr2 = reduction(expr2At.getRight());
 		if(expr1.getClass() == NumberConst.class) {
@@ -430,6 +405,18 @@ public class VM {
 		else if(expr2.getClass() == StringConst.class) {
 			expr2 = (StringConst) expr2;
 		}
+		else if(expr1.getClass() == PairNode.class) {
+			expr1 = (PairNode) expr1;
+		}
+		else if(expr2.getClass() == PairNode.class) {
+			expr2 = (PairNode) expr2;
+		}
+		else if(Builtin.isNil(expr1)) {
+			expr1 = (Builtin) expr1;
+		}
+		else if(Builtin.isNil(expr2)) {
+			expr2 = (Builtin) expr2;
+		}
 		else {
 			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean or String");
 		}
@@ -440,10 +427,8 @@ public class VM {
 	}
 	
 	private Node geqExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -460,10 +445,8 @@ public class VM {
 	}
 	
 	private Node leqExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
@@ -480,10 +463,8 @@ public class VM {
 	}
 	
 	private Node neqExpr() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
 		Node expr2 = reduction(expr2At.getRight());
 		if(expr1.getClass() == NumberConst.class) {
@@ -514,10 +495,8 @@ public class VM {
 	}
 	
 	private Node pair() {
-		At expr1At = (At) stack.lastElement();
-		stack.pop();
-		At expr2At = (At) stack.lastElement();
-		stack.pop();
+		At expr1At = (At) stack.pop();
+		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
 		Node expr2 = reduction(expr2At.getRight());
 		PairNode resultPair = new PairNode(expr1, expr2);
@@ -527,8 +506,7 @@ public class VM {
 	}
 	
 	private Node headOrTail(Node expr) {
-		At exprAt = (At) stack.lastElement();
-		stack.pop();
+		At exprAt = (At) stack.pop();
 		Node result;
 		Node exprRightReduction = reduction(exprAt.getRight()); 
 		if(Builtin.isHd(expr)) {

@@ -23,13 +23,8 @@ import parser.DefHashMap;
 
 public class ReplaceVisitor extends Visitor{
 	
-	DefHashMap defLeft;
-	
-	public ReplaceVisitor(DefHashMap defLeft) {
-		//ReplaceVisitor wird mit einem Def erstellt, bei visit(Var n) wird dann das defLeft benutzt.
-		this.defLeft = defLeft;
-	}
-	
+	private DefHashMap defLeft;
+
 	@Override
 	public Node visit(At n) {
 		//Besuche linke und rechte Knoten von At und führe accept auf beide Seiten aus, wodurch jeder Knoten
@@ -66,27 +61,35 @@ public class ReplaceVisitor extends Visitor{
 	
 	@Override
 	public Node visit(Def n) {
-		DefHashMap defs = new DefHashMap(n.getDefinitions());
 		
-		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defs.returnHashMap().entrySet();
+		//Gedanke: defLeft auf n.getDefinitions setzen, damit man dies auch später für Var benutzen kann. 
+		//Alle Knoten der Pairs accepten, damit sie auf sich gegenseitig zeigen
+		//die expr accepten, damit die variablen der expr durch die definitionen ersetzt werden
+		//ein neues def daraus machen und zurückgeben.
+		//Fehler an Beispiel one: 1:two ; two: 2:one
+		//Wenn one accepted wird, wird bei "two" 2:one eingefügt und wenn dann 2 accepted wird,
+		//wird bei 2:one für one 1:2:one eingefügt, da bei one das eingesetzt wurde.
+		//Problem ist, dass es sich nicht gegenseitig aufruft und so wie es hier ist, nach dem
+		//ersten Durchlauf immer one aufgerufen wird, da bei one und bei two jetzt nur auf
+		//one gezeigt wird.
+		
+		defLeft = new DefHashMap(n.getDefinitions());
+		
+		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defLeft.returnHashMap().entrySet();
 		Iterator<Entry<String, Pair<ArrayList<String>, Node>>> it = entrySet.iterator();
-		
-		int i = 0;
 		
 		while(it.hasNext()) {
 			Map.Entry me = (Map.Entry) it.next();
+			System.out.println("replacing: " + me.getKey());
 			Pair<ArrayList<String>, Node> value = (Pair<ArrayList<String>, Node>) me.getValue();
-			Pair<ArrayList<String>, Node> value2 = new Pair<ArrayList<String>, Node>(value.first, value.getValue().accept(this));
-			
-			defs.returnHashMap().replace((String) defs.returnHashMap().keySet().toArray()[i], value2);
-			i++;
+			defLeft.update((String) me.getKey(), value.setValue(value.getValue().accept(this)));
 		}
 		
-		Node y = n.getExpr().accept(this);
+		Node expr = n.getExpr().accept(this);
+	
+		Def newDef = new Def(defLeft.returnHashMap(), expr);
 		
-		Def x = new Def(defs.returnHashMap(), y);
-		
-		return x;
+		return newDef;
 	}
 
 	@Override
@@ -98,12 +101,11 @@ public class ReplaceVisitor extends Visitor{
 	public Node visit(StringConst n) {
 		return n;
 	}
-
 	@Override
 	public Node visit(Var n) {
 		//ersetze die Variable durch den Node des dazugehörigen parameters. Werfe Fehler, wenn nicht existiert.
 		if(defLeft.returnHashMap().containsKey(n.getVar())) {
-			return defLeft.returnHashMap().get(n.getVar()).second;
+			return defLeft.returnHashMap().get(n.getVar()).getValue();
 		}
 		else {
 			throw new RuntimeException(n + " is not defined.");

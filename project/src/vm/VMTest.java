@@ -21,9 +21,9 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.doCompile();
+		Def cDef = c.getResult();
 		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
-		ReplaceVisitor v2 = new ReplaceVisitor(cDefDefinitions);
+		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
 		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
 		
@@ -38,9 +38,9 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.doCompile();
+		Def cDef = c.getResult();
 		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
-		ReplaceVisitor v2 = new ReplaceVisitor(cDefDefinitions);
+		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
 		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
 		
@@ -55,9 +55,9 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.doCompile();
+		Def cDef = c.getResult();
 		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
-		ReplaceVisitor v2 = new ReplaceVisitor(cDefDefinitions);
+		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
 		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
 		
@@ -72,9 +72,9 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.doCompile();
+		Def cDef = c.getResult();
 		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
-		ReplaceVisitor v2 = new ReplaceVisitor(cDefDefinitions);
+		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
 		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
 		

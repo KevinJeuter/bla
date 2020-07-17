@@ -25,42 +25,50 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		
+		//If no file is selected: Error
 		if(args.length <= 0) {
 			throw new RuntimeException("No file selected.");
 		}
 		
-		String src = fileToString(args[0]); //Eingabeprogramm
+		// *Lexer*
+		String src = fileToString(args[0]); //Eingabeprogramm	
 		
+		//If file is empty: Error
+		if(src.isEmpty()) {
+			throw new RuntimeException("File is empty.");
+		}
+
 		lexer.Lexer l = new lexer.Lexer(src); //Lexe das Eingabeprogramm
 		
-		parser.Parser p = new parser.Parser(l); //Parse das gelexte Programm
+		// *Parser*
+		parser.Parser p = new parser.Parser(l); //instanziiere Parser
+		Def ast = p.system();	//parse das gelexte Programm
 		
-		Def pDef = p.system();	//p.system() erzeugt einen Def Knoten aus dem Programm
-		
+		// *AST Debugging*
 		DotVisitor v = new DotVisitor();
-		
-		v.visit(pDef);
-		
+		v.visit(ast);
 		System.out.println(v.getDotResult()); //printe den erzeugten Baum vom Parser
 		
-		compiler.Compiler c = new compiler.Compiler(pDef); //Kompiliere das erzeugte Def von p.system()
+		// *Compiler*
 		
-		Def cDef = c.doCompile(); //Abstraktion nach David Turner
+		// *Stage 1: Abstraction*
+		compiler.Compiler c = new compiler.Compiler(ast); //Instanziiere den Compiler
+		Def byteCode = c.getResult(); //Abstraktion nach David Turner
+		DefHashMap byteCodeDefHashMap = new DefHashMap(byteCode.getDefinitions()); //Mache ein DefHashMap aus der Abstr.
 		
-		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions()); //Mache ein DefHashMap aus der Abstr.
+		// *Stage 2: Replace Visitor*
+		ReplaceVisitor v2 = new ReplaceVisitor(); 
+		Def replacedByteCode = (Def) v2.visit(byteCode); //Ersetze die Parameter durch die Nodes
 		
-		ReplaceVisitor v2 = new ReplaceVisitor(cDefDefinitions); //Ersetze die Parameter durch die Nodes
-		
-		Def newCDef = (Def) v2.visit(cDef); 
-		
+		// *Compiler Debugging*
 		DotVisitor v3 = new DotVisitor();
-		
-		v3.visit(newCDef);
-		
+		v3.visit(replacedByteCode);
 		System.out.println(v3.getDotResult()); //printe den erzeugten Baum vom Kompilierer
 		
-		vm.VM reductionOfCompilerDef = new vm.VM(newCDef); //Füge das kompilierte Programm in die Reduktionsmaschine
+		// *Reduction*
+		vm.VM reductionOfCompilerDef = new vm.VM(replacedByteCode); //Füge das kompilierte Programm in die Reduktionsmaschine
 
+		// *Printing*
 		System.out.println(reductionOfCompilerDef.print()); //Reduziere das Programm und printe das Ergebnis
 		
 	}

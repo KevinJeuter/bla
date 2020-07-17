@@ -24,7 +24,7 @@ class CompilerTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.doCompile();
+		Def cDef = c.getResult();
 
 		Builtin S = new Builtin(Builtin.funct.S);
 		Builtin K = new Builtin(Builtin.funct.K);

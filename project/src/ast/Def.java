@@ -20,6 +20,7 @@ public class Def extends Node{
 	}
 	
 	public HashMap<String, Pair<ArrayList<String>, Node>> getDefinitions() {
+		//return (HashMap<String, Pair<ArrayList<String>, Node>>) left.clone();
 		return left;
 	}
 	

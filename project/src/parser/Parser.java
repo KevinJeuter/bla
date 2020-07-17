@@ -547,11 +547,7 @@ public class Parser {
 			match(tokenParenr);
 			return simpleExpr;
 		}
-		
-		else if(l.getLookahead().getClass() == Specials.class) {
-			throw new RuntimeException("File is empty");
-		}
-		
+
 		else {
 			throw new RuntimeException("not a simple");
 		}

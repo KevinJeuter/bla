@@ -15,7 +15,7 @@ public class Lexer {
 	public Lexer(String file){
 		
 		String src = file;
-
+		
 		for (;;) { // forever	
 
 			if (ptr == src.length()) { 

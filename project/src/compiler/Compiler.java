@@ -17,23 +17,30 @@ import parser.DefHashMap;
 public class Compiler {
 	
 	private Def pDef;
-	DefHashMap newDefLeft = new DefHashMap();
+	private DefHashMap newDefLeft = new DefHashMap();
 	
 	public Compiler(Def parser) {
 		pDef = parser;
+	}
+	
+	//Make new Def with newDef and original Expr
+	public Def getResult() {
 		for(int y = 0; y < pDef.getDefinitions().size(); y++) {
+			// *Def left side*
 			//Get Key at position counter (Def name)
 			String key = pDef.getDefinitions().keySet().stream().skip(y).findFirst().get();
+			
+			// *Def right side*
 			//Get Value at position counter (Def Var + Node)
 			Pair<ArrayList<String>, Node> value = pDef.getDefinitions().values().stream().skip(y).findFirst().get();
 		
 			//Make array list of all variables
-			ArrayList<String> variables = value.first;
+			ArrayList<String> variables = value.getKey();
 		
 			//Make new Pair of variables and compiled Node
 			Pair<ArrayList<String>, Node> newDefLeftPair;
 		
-			Node x = value.second;
+			Node x = value.getValue();
 			
 			//Compile for each variable
 			for(int i = variables.size() - 1; i >= 0 ; i--) {
@@ -43,10 +50,8 @@ public class Compiler {
 			newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, x);
 			newDefLeft.put(key, newDefLeftPair);
 		}
-	}
-	//Make new Def with newDef and original Expr
-	public Def doCompile() {
-		Def x = new Def(newDefLeft.returnHashMap(), pDef.getExpr());
+		
+		Def x = new Def(newDefLeft.returnHashMap(), pDef.getExpr()); 
 		return x;
 	}
 	

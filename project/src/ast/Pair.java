@@ -5,8 +5,8 @@ import java.util.Objects;
 //Klasse Pair mit Datentypen F, S. first und second sind die Werte.
 
 public class Pair<F, S> {
-    public final F first;
-    public S second;
+    private final F first;
+    private S second;
 
     public Pair(F first, S second) {
         this.first = first;
@@ -38,8 +38,9 @@ public class Pair<F, S> {
     	return this.second;
     }
     
-    public S setValue(S x) {
+    public Pair<F, S> setValue(S x) {
     	this.second = x;
-    	return this.second;
+    	Pair<F, S> newPair = new Pair<F, S>(this.first, this.second);
+    	return newPair;
     }
 }
