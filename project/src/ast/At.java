@@ -19,7 +19,6 @@ public class At extends Node{
 	public Node getRight() {
 		return this.right;
 	}
-	
 	/*
 	public String toString() {
 		return this.left.toString() + " @ " + this.right.toString();

@@ -400,23 +400,40 @@ public class VM {
 		return expr1.toString().equals(expr2.toString()) && (expr1.getClass() == expr2.getClass());
 	}
 	
-	private boolean isSame(PairNode l1, PairNode l2) {
-		if(isEqu(l1.getLeft(), l2.getLeft())){
-			if(Builtin.isNil(l1.getRight()) && Builtin.isNil(l2.getRight())) {
-				return true;
-			}
-			else if(reduction(l1.getRight()).getClass() == PairNode.class && reduction(l2.getRight()).getClass() == PairNode.class){
-				PairNode l1Right = (PairNode) reduction(l1.getRight());
-				PairNode l2Right = (PairNode) reduction(l2.getRight());
-				return isSame(l1Right, l2Right);
+	private boolean isEquLists(PairNode l1, PairNode l2) {
+		Node l1RedLeft = reduction(l1.getLeft());
+		Node l2RedLeft = reduction(l2.getLeft());
+		Node l1RedRight = reduction(l1.getRight());
+		Node l2RedRight = reduction(l2.getRight());
+		boolean result = true;
+		if(l1RedLeft.getClass() == PairNode.class) {
+			if(l2RedLeft.getClass() == PairNode.class) {
+				PairNode l1RedLeftPair = (PairNode) l1RedLeft;
+				PairNode l2RedLeftPair = (PairNode) l2RedLeft;
+				result = result && isEquLists(l1RedLeftPair, l2RedLeftPair);
 			}
 			else {
-				return false;
+				result = result && false;
 			}
 		}
 		else {
-			return false;
+			result = result && isEqu(l1RedLeft, l2RedLeft);
 		}
+		if(l1RedRight.getClass() == PairNode.class) {
+			if(l2RedRight.getClass() == PairNode.class) {
+				PairNode l1RedRightPair = (PairNode) l1RedRight;
+				PairNode l2RedRightPair = (PairNode) l2RedRight;
+				result = result && isEquLists(l1RedRightPair, l2RedRightPair);
+			}
+			else {
+				result = result && false;
+			}
+		}
+		else {
+			result = result && isEqu(l1RedRight, l2RedRight);
+		}
+		
+		return result;
 	}
 	
 	private Node equExpr() {
@@ -452,7 +469,7 @@ public class VM {
 			if(expr2.getClass() == PairNode.class) {
 				PairNode expr1Pair = (PairNode) expr1;
 				PairNode expr2Pair = (PairNode) expr2;
-				BooleanConst isEqu = new BooleanConst(isSame(expr1Pair, expr2Pair));
+				BooleanConst isEqu = new BooleanConst(isEquLists(expr1Pair, expr2Pair));
 				return isEqu;
 			}
 			else {
@@ -528,11 +545,23 @@ public class VM {
 		else if(expr2.getClass() == StringConst.class) {
 			expr2 = (StringConst) expr2;
 		}
+		else if(expr1.getClass() == PairNode.class) {
+			if(expr2.getClass() == PairNode.class) {
+				PairNode expr1Pair = (PairNode) expr1;
+				PairNode expr2Pair = (PairNode) expr2;
+				BooleanConst isEqu = new BooleanConst(!isEquLists(expr1Pair, expr2Pair));
+				return isEqu;
+			}
+			else {
+				BooleanConst trueNode = new BooleanConst(true);
+				return trueNode;
+			}
+		}
 		else {
 			throw new RuntimeException("\"~=\" needs two arguments of the type Integer, Boolean or String");
 		}
 		//Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst(!((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass())));
+		BooleanConst resultBool = new BooleanConst(!isEqu(expr1, expr2));
 		//At result = new At(I, resultBool);
 		return reduction(resultBool);
 	}
