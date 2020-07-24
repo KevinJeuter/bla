@@ -33,5 +33,13 @@ public class PairNode extends Node{
 	public static boolean isPair(Node x) {
 		return x.getClass() == PairNode.class;
 	}
-
+	
+	public void setRight(Node right) {
+		this.right = right;
+	}
+	
+	public void setLeft(Node left) {
+		this.left = left;
+	}
+	
 }

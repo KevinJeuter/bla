@@ -28,6 +28,10 @@ public class Def extends Node{
 		return right;
 	}
 	
+	public void updateExpr(Node right) {
+		this.right = right;
+	}
+	
 	@Override
 	public String toString() {
 		return left.toString() + " DEF " + right.toString();

@@ -36,11 +36,25 @@ public class VM {
 		}
 		else if(PairNode.isPair(result)) {
 			PairNode resultPair = (PairNode) result;
-			//errorNoNil(resultPair);
+			reductionPair(resultPair);
+			errorNoNil(resultPair);
 			return result.toString();
 		}
 		else {
 			throw new RuntimeException("The result is not a printable object. (No constant, nor a pair)");
+		}
+	}
+	
+	private void reductionPair(PairNode result) {
+		result.setRight(reduction(result.getRight()));
+		if(result.getRight().getClass() == PairNode.class) {
+			PairNode resultRight = (PairNode) result.getRight();
+			reductionPair(resultRight);
+		}
+		result.setLeft(reduction(result.getLeft()));
+		if(result.getLeft().getClass() == PairNode.class) {
+			PairNode resultLeft = (PairNode) result.getLeft();
+			reductionPair(resultLeft);
 		}
 	}
 	
@@ -297,13 +311,13 @@ public class VM {
 			Node result;
 			if(boolExpr1.getBoolConst()) {
 				//result = new At(I, reduction(expr2At.getRight()));
-				result = expr2At.getRight();
+				result = reduction(expr2At.getRight());
 			}
 			else {
 				//result = new At(I, reduction(expr3At.getRight()));
-				result = expr3At.getRight();
+				result = reduction(expr3At.getRight());
 			}
-			return reduction(result);
+			return result;
 		}
 		else {
 			throw new RuntimeException("If argument needs to be a boolean");
@@ -382,6 +396,29 @@ public class VM {
 		}
 	}
 	
+	private boolean isEqu(Node expr1, Node expr2) {
+		return expr1.toString().equals(expr2.toString()) && (expr1.getClass() == expr2.getClass());
+	}
+	
+	private boolean isSame(PairNode l1, PairNode l2) {
+		if(isEqu(l1.getLeft(), l2.getLeft())){
+			if(Builtin.isNil(l1.getRight()) && Builtin.isNil(l2.getRight())) {
+				return true;
+			}
+			else if(reduction(l1.getRight()).getClass() == PairNode.class && reduction(l2.getRight()).getClass() == PairNode.class){
+				PairNode l1Right = (PairNode) reduction(l1.getRight());
+				PairNode l2Right = (PairNode) reduction(l2.getRight());
+				return isSame(l1Right, l2Right);
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	
 	private Node equExpr() {
 		At expr1At = (At) stack.pop();
 		At expr2At = (At) stack.pop();
@@ -405,25 +442,31 @@ public class VM {
 		else if(expr2.getClass() == StringConst.class) {
 			expr2 = (StringConst) expr2;
 		}
-		else if(expr1.getClass() == PairNode.class) {
-			expr1 = (PairNode) expr1;
-		}
-		else if(expr2.getClass() == PairNode.class) {
-			expr2 = (PairNode) expr2;
-		}
 		else if(Builtin.isNil(expr1)) {
 			expr1 = (Builtin) expr1;
 		}
 		else if(Builtin.isNil(expr2)) {
 			expr2 = (Builtin) expr2;
+		}		
+		else if(expr1.getClass() == PairNode.class) {
+			if(expr2.getClass() == PairNode.class) {
+				PairNode expr1Pair = (PairNode) expr1;
+				PairNode expr2Pair = (PairNode) expr2;
+				BooleanConst isEqu = new BooleanConst(isSame(expr1Pair, expr2Pair));
+				return isEqu;
+			}
+			else {
+				BooleanConst falseNode = new BooleanConst(false);
+				return falseNode;
+			}
 		}
 		else {
-			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean or String");
+			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean, String or List");
 		}
 		//Builtin I = new Builtin(Builtin.funct.I);
-		BooleanConst resultBool = new BooleanConst((expr1.toString().equals(expr2.toString())) && (expr1.getClass() == expr2.getClass()));
+		BooleanConst resultBool = new BooleanConst(isEqu(expr1, expr2));
 		//At result = new At(I, resultBool);
-		return reduction(resultBool);
+		return resultBool;
 	}
 	
 	private Node geqExpr() {
@@ -497,12 +540,12 @@ public class VM {
 	private Node pair() {
 		At expr1At = (At) stack.pop();
 		At expr2At = (At) stack.pop();
-		Node expr1 = reduction(expr1At.getRight());
-		Node expr2 = reduction(expr2At.getRight());
+		Node expr1 = expr1At.getRight();
+		Node expr2 = expr2At.getRight();
 		PairNode resultPair = new PairNode(expr1, expr2);
 		//Builtin I = new Builtin(Builtin.funct.I);
 		//At result = new At(I, resultPair);
-		return reduction(resultPair);
+		return resultPair;
 	}
 	
 	private Node headOrTail(Node expr) {
@@ -540,10 +583,11 @@ public class VM {
 	}
 	
 	private Node headReduction(PairNode toReduce){
-		return toReduce.getLeft();
+		return reduction(toReduce.getLeft());
 	}
 
 	private Node tailReduction(PairNode toReduce) {
-		return toReduce.getRight();
+		return reduction(toReduce.getRight());
 	}
+	
 }

@@ -20,8 +20,17 @@ public class At extends Node{
 		return this.right;
 	}
 	
+	/*
 	public String toString() {
 		return this.left.toString() + " @ " + this.right.toString();
+	}*/
+	
+	public void setLeft(Node left) {
+		this.left = left;
+	}
+	
+	public void setRight(Node right) {
+		this.right = right;
 	}
 
 	@Override

@@ -40,6 +40,7 @@ public class Main {
 
 		lexer.Lexer l = new lexer.Lexer(src); //Lexe das Eingabeprogramm
 		
+		
 		// *Parser*
 		parser.Parser p = new parser.Parser(l); //instanziiere Parser
 		Def ast = p.system();	//parse das gelexte Programm
@@ -54,18 +55,19 @@ public class Main {
 		// *Stage 1: Abstraction*
 		compiler.Compiler c = new compiler.Compiler(ast); //Instanziiere den Compiler
 		Def byteCode = c.getResult(); //Abstraktion nach David Turner
-		DefHashMap byteCodeDefHashMap = new DefHashMap(byteCode.getDefinitions()); //Mache ein DefHashMap aus der Abstr.
+		//DefHashMap byteCodeDefHashMap = new DefHashMap(byteCode.getDefinitions()); //Mache ein DefHashMap aus der Abstr.
 		
 		// *Stage 2: Replace Visitor*
 		ReplaceVisitor v2 = new ReplaceVisitor(); 
 		Def replacedByteCode = (Def) v2.visit(byteCode); //Ersetze die Parameter durch die Nodes
 		
 		// *Compiler Debugging*
-		DotVisitor v3 = new DotVisitor();
-		v3.visit(replacedByteCode);
-		System.out.println(v3.getDotResult()); //printe den erzeugten Baum vom Kompilierer
+		//DotVisitor v3 = new DotVisitor();
+		//v3.visit(replacedByteCode);
+		//System.out.println(v3.getDotResult()); //printe den erzeugten Baum vom Kompilierer
 		
 		// *Reduction*
+		//UMBENENNEN
 		vm.VM reductionOfCompilerDef = new vm.VM(replacedByteCode); //Füge das kompilierte Programm in die Reduktionsmaschine
 
 		// *Printing*

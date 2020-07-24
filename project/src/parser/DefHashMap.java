@@ -28,6 +28,8 @@ public class DefHashMap {
 	public HashMap<String, Pair<ArrayList<String>, Node>> returnHashMap(){
 		return definitions;
 	}
+
+	//GET DEFINITIONS
 	
 	/**
 	 * Replace Object "name" in HashMap with new value
@@ -40,6 +42,7 @@ public class DefHashMap {
 		return defs;
 	}
 	
+	//VLT NICHT
 	public String getName(int position) {
 		HashMap<String, Pair<ArrayList<String>, Node>> defs = definitions;
 		return (String) defs.keySet().toArray()[position];

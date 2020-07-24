@@ -29,24 +29,17 @@ public class ReplaceVisitor extends Visitor{
 	public Node visit(At n) {
 		//Besuche linke und rechte Knoten von At und führe accept auf beide Seiten aus, wodurch jeder Knoten
 		//besucht wird.
-		Node atLeft = n.getLeft().accept(this);
-
-		Node atRight = n.getRight().accept(this);
 		
-		At acceptedAt = new At(atLeft, atRight);
-		return acceptedAt;
+		n.setLeft(n.getLeft().accept(this));
+		
+		n.setRight(n.getRight().accept(this));
+
+		return n;
 	}
 	
 	@Override
 	public Node visit(PairNode n) {
-		//Besuche linke und rechte Knoten von At und führe accept auf beide Seiten aus, wodurch jeder Knoten
-		//besucht wird.
-		Node pairLeft = n.getLeft().accept(this);
-
-		Node pairRight = n.getRight().accept(this);
-		
-		PairNode acceptedPair = new PairNode(pairLeft, pairRight);
-		return acceptedPair;
+		throw new RuntimeException("PairNode found in compiling stage");
 	}
 
 	@Override
@@ -88,7 +81,7 @@ public class ReplaceVisitor extends Visitor{
 		Node expr = n.getExpr().accept(this);
 	
 		Def newDef = new Def(defLeft.returnHashMap(), expr);
-		
+		//NEW ÄNDERN
 		return newDef;
 	}
 
