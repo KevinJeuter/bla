@@ -441,29 +441,43 @@ public class VM {
 		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
 		Node expr2 = reduction(expr2At.getRight());
+		BooleanConst falseNode = new BooleanConst(false);
 		if(expr1.getClass() == NumberConst.class) {
-			expr1 = (NumberConst) expr1;
-		}
-		else if(expr2.getClass() == NumberConst.class) {
-			expr2 = (NumberConst) expr2;
+			if(expr2.getClass() == NumberConst.class) {
+				expr1 = (NumberConst) expr1;
+				expr2 = (NumberConst) expr2;
+			}
+			else {
+				return falseNode;
+			}
 		}
 		else if(expr1.getClass() == BooleanConst.class) {
-			expr1 = (BooleanConst) expr1;
+			if(expr2.getClass() == BooleanConst.class) {
+				expr1 = (BooleanConst) expr1;
+				expr2 = (BooleanConst) expr2;
+			}
+			else {
+				return falseNode;
+			}
 		}
-		else if(expr2.getClass() == BooleanConst.class) {
-			expr2 = (BooleanConst) expr2;
-		}
+		
 		else if(expr1.getClass() == StringConst.class) {
-			expr1 = (StringConst) expr1;
-		}
-		else if(expr2.getClass() == StringConst.class) {
-			expr2 = (StringConst) expr2;
+			if(expr2.getClass() == StringConst.class) {
+				expr1 = (StringConst) expr1;
+				expr2 = (StringConst) expr2;
+			}
+			else {
+				return falseNode;
+			}
 		}
 		else if(Builtin.isNil(expr1)) {
-			expr1 = (Builtin) expr1;
-		}
-		else if(Builtin.isNil(expr2)) {
-			expr2 = (Builtin) expr2;
+			if(Builtin.isNil(expr2)) {
+				expr1 = (Builtin) expr1;
+				expr2 = (Builtin) expr2;
+			}
+			else {
+				return falseNode;
+			}
 		}		
 		else if(expr1.getClass() == PairNode.class) {
 			if(expr2.getClass() == PairNode.class) {
@@ -473,7 +487,6 @@ public class VM {
 				return isEqu;
 			}
 			else {
-				BooleanConst falseNode = new BooleanConst(false);
 				return falseNode;
 			}
 		}
@@ -527,24 +540,44 @@ public class VM {
 		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
 		Node expr2 = reduction(expr2At.getRight());
+		BooleanConst trueNode = new BooleanConst(true);
 		if(expr1.getClass() == NumberConst.class) {
-			expr1 = (NumberConst) expr1;
-		}
-		else if(expr2.getClass() == NumberConst.class) {
-			expr2 = (NumberConst) expr2;
+			if(expr2.getClass() == NumberConst.class) {
+				expr1 = (NumberConst) expr1;
+				expr2 = (NumberConst) expr2;
+			}
+			else {
+				return trueNode;
+			}
 		}
 		else if(expr1.getClass() == BooleanConst.class) {
-			expr1 = (BooleanConst) expr1;
+			if(expr2.getClass() == BooleanConst.class) {
+				expr1 = (BooleanConst) expr1;
+				expr2 = (BooleanConst) expr2;
+			}
+			else {
+				return trueNode;
+			}
 		}
-		else if(expr2.getClass() == BooleanConst.class) {
-			expr2 = (BooleanConst) expr2;
-		}
+		
 		else if(expr1.getClass() == StringConst.class) {
-			expr1 = (StringConst) expr1;
+			if(expr2.getClass() == StringConst.class) {
+				expr1 = (StringConst) expr1;
+				expr2 = (StringConst) expr2;
+			}
+			else {
+				return trueNode;
+			}
 		}
-		else if(expr2.getClass() == StringConst.class) {
-			expr2 = (StringConst) expr2;
-		}
+		else if(Builtin.isNil(expr1)) {
+			if(Builtin.isNil(expr2)) {
+				expr1 = (Builtin) expr1;
+				expr2 = (Builtin) expr2;
+			}
+			else {
+				return trueNode;
+			}
+		}		
 		else if(expr1.getClass() == PairNode.class) {
 			if(expr2.getClass() == PairNode.class) {
 				PairNode expr1Pair = (PairNode) expr1;
@@ -553,17 +586,16 @@ public class VM {
 				return isEqu;
 			}
 			else {
-				BooleanConst trueNode = new BooleanConst(true);
 				return trueNode;
 			}
 		}
 		else {
-			throw new RuntimeException("\"~=\" needs two arguments of the type Integer, Boolean or String");
+			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean, String or List");
 		}
 		//Builtin I = new Builtin(Builtin.funct.I);
 		BooleanConst resultBool = new BooleanConst(!isEqu(expr1, expr2));
 		//At result = new At(I, resultBool);
-		return reduction(resultBool);
+		return resultBool;
 	}
 	
 	private Node pair() {
