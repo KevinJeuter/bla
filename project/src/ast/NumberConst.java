@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for Number Nodes
+ */
+
 import visitors.Visitor;
 
 public class NumberConst extends Node{

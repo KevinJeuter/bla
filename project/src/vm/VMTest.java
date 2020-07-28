@@ -21,15 +21,14 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.getResult();
-		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
+		Def cDef = c.getCompilerResult();
 		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
-		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
+		vm.VM vm = new vm.VM(newCDef);
 		
 		NumberConst fourtytwo = new NumberConst(42);
 		
-		assertEquals(reductionOfCompilerDef.reduction().toString(), fourtytwo.toString());
+		assertEquals(vm.print(), fourtytwo.toString());
 	}
 	
 	@Test
@@ -38,15 +37,14 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.getResult();
-		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
+		Def cDef = c.getCompilerResult();
 		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
-		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
+		vm.VM vm = new vm.VM(newCDef);
 		
-		BooleanConst result = (BooleanConst) reductionOfCompilerDef.reduction();
+		String result = vm.print();
 		
-		assertTrue(result.getBoolConst());
+		assertEquals(result, "true");
 	}
 	
 	@Test
@@ -55,15 +53,14 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.getResult();
-		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
+		Def cDef = c.getCompilerResult();
 		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
-		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
+		vm.VM vm = new vm.VM(newCDef);
 		
-		BooleanConst result = (BooleanConst) reductionOfCompilerDef.reduction();
+		String result = vm.print();
 		
-		assertFalse(result.getBoolConst());
+		assertEquals(result, "false");
 	}
 	
 	@Test
@@ -72,15 +69,14 @@ class VMTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.getResult();
-		DefHashMap cDefDefinitions = new DefHashMap(cDef.getDefinitions());
+		Def cDef = c.getCompilerResult();
 		ReplaceVisitor v2 = new ReplaceVisitor();
 		Def newCDef = (Def) v2.visit(cDef); 
-		vm.VM reductionOfCompilerDef = new vm.VM(newCDef);
+		vm.VM vm = new vm.VM(newCDef);
 		
 		NumberConst two = new NumberConst(2);
 		
-		assertEquals(reductionOfCompilerDef.reduction().toString(), two.toString());
+		assertEquals(vm.print(), two.toString());
 	}
 
 }

@@ -1,5 +1,9 @@
 package lexer;
 
+/*
+ * Class for Identifier Tokens
+ */
+
 public class Identifier extends Token {	
 	
 	private String id;

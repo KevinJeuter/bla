@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for At Nodes
+ */
+
 import visitors.Visitor;
 
 public class At extends Node{
@@ -19,10 +23,14 @@ public class At extends Node{
 	public Node getRight() {
 		return this.right;
 	}
+	
+	//  *ONLY USED FOR TESTS*
 	/*
+	@Override
 	public String toString() {
 		return this.left.toString() + " @ " + this.right.toString();
-	}*/
+	}
+	*/
 	
 	public void setLeft(Node left) {
 		this.left = left;

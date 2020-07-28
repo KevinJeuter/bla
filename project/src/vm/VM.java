@@ -13,6 +13,7 @@ import ast.PairNode;
 
 public class VM {
 	
+	//This will be the stack to reduce the program
 	Stack<Node> stack = new Stack<Node>();
 	
 	Node defExpr;
@@ -26,8 +27,10 @@ public class VM {
 		return ((x.getClass() == BooleanConst.class) || (x.getClass() == StringConst.class) || (x.getClass() == NumberConst.class));
 	}
 
+	//In the print method, the program will be reduced. Also Pairs will get further reduced, until they are printable here.
+	//If there is no nil at the end of a list, throw an Error.
 	public String print() {
-		Node result = reduction();
+		Node result = reduction(defExpr);
 		if(isConstant(result)) {
 			return result.toString();
 		}
@@ -76,11 +79,8 @@ public class VM {
 			}
 		}
 	}
-	
-	public Node reduction() {
-		return reduction(defExpr);
-	}
-	
+
+	// * Main Part of reduction. Through recursion fill and empty Stack and reduce *
 	private Node reduction(Node expr){
 		if(At.isAt(expr)) {
 			return atExpr(expr);
@@ -173,8 +173,6 @@ public class VM {
 	private Node kExpr() {
 		At exprAt = (At) stack.pop();
 		stack.pop();
-		//Builtin I = new Builtin(Builtin.funct.I);
-		//At result = new At(I, reduction(exprAt.getRight()));
 		return reduction(exprAt.getRight());
 	}
 	
@@ -186,14 +184,12 @@ public class VM {
 	private Node plusExpr() {
 		At expr1At = (At) stack.pop();
 		At expr2At = (At) stack.pop();
-		//Builtin I = new Builtin(Builtin.funct.I);
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class){
 			NumberConst intX = (NumberConst) reductionExpr1;
 			NumberConst intY = (NumberConst) reductionExpr2;
 			NumberConst result = new NumberConst(intX.getNumConst() + intY.getNumConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -205,10 +201,8 @@ public class VM {
 		At expr1At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class) {
-			//Builtin I = new Builtin(Builtin.funct.I);
 			NumberConst intX = (NumberConst) reductionExpr1;
 			NumberConst result = new NumberConst(+ intX.getNumConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -222,11 +216,9 @@ public class VM {
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
-			//Builtin I = new Builtin(Builtin.funct.I);
 			NumberConst intX = (NumberConst) reductionExpr1;
 			NumberConst intY = (NumberConst) reductionExpr2;
 			NumberConst result = new NumberConst(intX.getNumConst() - intY.getNumConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -238,10 +230,8 @@ public class VM {
 		At expr1At = (At) stack.pop();
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class) {
-			//Builtin I = new Builtin(Builtin.funct.I);
 			NumberConst intX = (NumberConst) reductionExpr1;
 			NumberConst result = new NumberConst(- intX.getNumConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -255,11 +245,9 @@ public class VM {
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
-			//Builtin I = new Builtin(Builtin.funct.I);
 			NumberConst intX = (NumberConst) reductionExpr1;
 			NumberConst intY = (NumberConst) reductionExpr2;
 			NumberConst result = new NumberConst(intX.getNumConst() * intY.getNumConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -273,11 +261,9 @@ public class VM {
 		Node reductionExpr1 = reduction(expr1At.getRight());
 		Node reductionExpr2 = reduction(expr2At.getRight());
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
-			//Builtin I = new Builtin(Builtin.funct.I);
 			NumberConst intX = (NumberConst) reductionExpr1;
 			NumberConst intY = (NumberConst) reductionExpr2;
 			NumberConst result = new NumberConst(intX.getNumConst() / intY.getNumConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -289,10 +275,8 @@ public class VM {
 		At exprAt = (At) stack.pop();
 		Node reductionExpr = reduction(exprAt.getRight());
 		if(reductionExpr.getClass() == BooleanConst.class) {
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst boolExpr = (BooleanConst) reductionExpr;
 			BooleanConst result = new BooleanConst(!boolExpr.getBoolConst());
-			//At resultAt = new At(I, result);
 			return reduction(result);
 		}
 		else {
@@ -307,14 +291,11 @@ public class VM {
 		Node expr1 = reduction(expr1At.getRight());
 		if(expr1.getClass() == BooleanConst.class) {
 			BooleanConst boolExpr1 = (BooleanConst) expr1;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			Node result;
 			if(boolExpr1.getBoolConst()) {
-				//result = new At(I, reduction(expr2At.getRight()));
 				result = reduction(expr2At.getRight());
 			}
 			else {
-				//result = new At(I, reduction(expr3At.getRight()));
 				result = reduction(expr3At.getRight());
 			}
 			return result;
@@ -332,9 +313,7 @@ public class VM {
 		if(reductionExpr1.getClass() == BooleanConst.class && reductionExpr2.getClass() == BooleanConst.class) {
 			BooleanConst boolExpr1 = (BooleanConst) reductionExpr1;
 			BooleanConst boolExpr2 = (BooleanConst) reductionExpr2;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() && boolExpr2.getBoolConst());
-			//At result = new At(I, resultBool);
 			return reduction(resultBool);
 		}
 		else {
@@ -350,9 +329,7 @@ public class VM {
 		if(reductionExpr1.getClass() == BooleanConst.class && reductionExpr2.getClass() == BooleanConst.class) {
 			BooleanConst boolExpr1 = (BooleanConst) reductionExpr1;
 			BooleanConst boolExpr2 = (BooleanConst) reductionExpr2;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst resultBool = new BooleanConst(boolExpr1.getBoolConst() || boolExpr2.getBoolConst());
-			//At result = new At(I, resultBool);
 			return reduction(resultBool);
 		}
 		else {
@@ -368,9 +345,7 @@ public class VM {
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
 			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
 			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() > numberExpr2.getNumConst());
-			//At result = new At(I, resultBool);
 			return reduction(resultBool);
 		}
 		else {
@@ -386,9 +361,7 @@ public class VM {
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
 			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
 			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() < numberExpr2.getNumConst());
-			//At result = new At(I, resultBool);
 			return reduction(resultBool);
 		}
 		else {
@@ -401,6 +374,11 @@ public class VM {
 	}
 	
 	private boolean isEquLists(PairNode l1, PairNode l2) {
+		//to check if 2 lists are the same, we first set result to true. This way, as soon as there is one false
+		//in the recursion it will calculate result && false, which will always be false from then on.
+		//We check here for each element, if the reduction is the same by first completely reducing the first elements
+		//of both lists. Then we check with isEqu(), if they are the same. We do this for every Element in the two lists,
+		//until one of them is empty. Then we return the result.
 		Node l1RedLeft = reduction(l1.getLeft());
 		Node l2RedLeft = reduction(l2.getLeft());
 		Node l1RedRight = reduction(l1.getRight());
@@ -437,6 +415,7 @@ public class VM {
 	}
 	
 	private Node equExpr() {
+		//If two Nodes aren't the same type, return false, otherwise check by isEqu()
 		At expr1At = (At) stack.pop();
 		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
@@ -493,9 +472,7 @@ public class VM {
 		else {
 			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean, String or List");
 		}
-		//Builtin I = new Builtin(Builtin.funct.I);
 		BooleanConst resultBool = new BooleanConst(isEqu(expr1, expr2));
-		//At result = new At(I, resultBool);
 		return resultBool;
 	}
 	
@@ -507,9 +484,7 @@ public class VM {
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
 			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
 			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() >= numberExpr2.getNumConst());
-			//At result = new At(I, resultBool);
 			return reduction(resultBool);
 		}
 		else {
@@ -525,9 +500,7 @@ public class VM {
 		if(reductionExpr1.getClass() == NumberConst.class && reductionExpr2.getClass() == NumberConst.class) {
 			NumberConst numberExpr1 = (NumberConst) reductionExpr1;
 			NumberConst numberExpr2 = (NumberConst) reductionExpr2;
-			//Builtin I = new Builtin(Builtin.funct.I);
 			BooleanConst resultBool = new BooleanConst(numberExpr1.getNumConst() <= numberExpr2.getNumConst());
-			//At result = new At(I, resultBool);
 			return reduction(resultBool);
 		}
 		else {
@@ -536,6 +509,7 @@ public class VM {
 	}
 	
 	private Node neqExpr() {
+		//If two Nodes aren't the same type, return true, otherwise check by isEqu()
 		At expr1At = (At) stack.pop();
 		At expr2At = (At) stack.pop();
 		Node expr1 = reduction(expr1At.getRight());
@@ -592,9 +566,7 @@ public class VM {
 		else {
 			throw new RuntimeException("\"=\" needs two arguments of the type Integer, Boolean, String or List");
 		}
-		//Builtin I = new Builtin(Builtin.funct.I);
 		BooleanConst resultBool = new BooleanConst(!isEqu(expr1, expr2));
-		//At result = new At(I, resultBool);
 		return resultBool;
 	}
 	
@@ -604,12 +576,11 @@ public class VM {
 		Node expr1 = expr1At.getRight();
 		Node expr2 = expr2At.getRight();
 		PairNode resultPair = new PairNode(expr1, expr2);
-		//Builtin I = new Builtin(Builtin.funct.I);
-		//At result = new At(I, resultPair);
 		return resultPair;
 	}
 	
 	private Node headOrTail(Node expr) {
+		//In the case of Hd or Tl we check if it is a non-empty PairNode, otherwise throw an Error.
 		At exprAt = (At) stack.pop();
 		Node result;
 		Node exprRightReduction = reduction(exprAt.getRight()); 

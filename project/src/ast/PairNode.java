@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for PairNodes
+ */
+
 import visitors.Visitor;
 
 public class PairNode extends Node{

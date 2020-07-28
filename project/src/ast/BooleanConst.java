@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for Boolean Nodes.
+ */
+
 import visitors.Visitor;
 
 public class BooleanConst extends Node{

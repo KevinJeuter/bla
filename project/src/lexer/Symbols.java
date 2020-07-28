@@ -1,5 +1,9 @@
 package lexer;
 
+/*
+ * Class for all Symbols
+ */
+
 public class Symbols extends Token {
 
 	private sym symbol;

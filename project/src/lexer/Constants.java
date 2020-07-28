@@ -1,5 +1,9 @@
 package lexer;
 
+/*
+ * Class for Constant tokens (Strings, Numbers, Booleans)
+ */
+
 public class Constants extends Token {
 
 	private String konst;
@@ -8,6 +12,7 @@ public class Constants extends Token {
 		konst = strKonst;
 	}
 	
+	//Checks if it contains only numbers
 	private boolean isNum() {
 		if(konst.matches("-?\\d+")) {
 			return true;
@@ -15,6 +20,7 @@ public class Constants extends Token {
 		return false;
 	}
 	
+	//It is only a string, if it starts and ends with a '"'. 
 	private boolean isString() {
 		if(konst.charAt(0) == '"' && konst.charAt(konst.length() - 1) == '"') {
 			return true;

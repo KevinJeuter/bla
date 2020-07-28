@@ -17,6 +17,7 @@ import ast.Pair;
 import ast.StringConst;
 import ast.Var;
 import ast.Where;
+import parser.DefHashMap;
 import ast.PairNode;
 
 
@@ -119,9 +120,9 @@ public class DotVisitor extends Visitor {
 	public Node visit(Def n) {
 		int listId = printNode("definitions");
 		
-		HashMap<String, Pair<ArrayList<String>, Node>> defs = n.getDefinitions();
+		DefHashMap defs = n.getDefinitions();
 		
-		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defs.entrySet();
+		Set<Entry<String, Pair<ArrayList<String>, Node>>> entrySet = defs.returnHashMap().entrySet();
 		Iterator<Entry<String, Pair<ArrayList<String>, Node>>> it = entrySet.iterator();
 		
 		while(it.hasNext()) {
@@ -169,7 +170,7 @@ public class DotVisitor extends Visitor {
 	public Node visit(Where n) {
 		int listId = printNode("defintions");
 		
-		HashMap<String, Pair<ArrayList<String>, Node>> defs = n.getDefinitions();
+		HashMap<String, Pair<ArrayList<String>, Node>> defs = n.getDefinitions().returnHashMap();
 		
 		Set<?> entrySet = defs.entrySet();
 		Iterator<?> it = entrySet.iterator();

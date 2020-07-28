@@ -17,6 +17,8 @@ import parser.DefHashMap;
 public class Compiler {
 	
 	private Def pDef;
+	
+	//newDefLeft is the HashMap that contains the abstraction and the expression of the input Def.
 	private DefHashMap newDefLeft = new DefHashMap();
 	
 	public Compiler(Def parser) {
@@ -24,35 +26,33 @@ public class Compiler {
 	}
 	
 	//Make new Def with newDef and original Expr
-	public Def getResult() {
-		for(int y = 0; y < pDef.getDefinitions().size(); y++) {
+	public Def getCompilerResult() {
+		for(int counter = 0; counter < pDef.getDefinitions().returnHashMap().size(); counter++) {
 			// *Def left side*
 			//Get Key at position counter (Def name)
-			String key = pDef.getDefinitions().keySet().stream().skip(y).findFirst().get();
+			String key = pDef.getDefinitions().returnHashMap().keySet().stream().skip(counter).findFirst().get();
 			
 			// *Def right side*
 			//Get Value at position counter (Def Var + Node)
-			Pair<ArrayList<String>, Node> value = pDef.getDefinitions().values().stream().skip(y).findFirst().get();
+			Pair<ArrayList<String>, Node> value = pDef.getDefinitions().returnHashMap().values().stream().skip(counter).findFirst().get();
 		
 			//Make array list of all variables
 			ArrayList<String> variables = value.getKey();
 		
-			//Make new Pair of variables and compiled Node
-			Pair<ArrayList<String>, Node> newDefLeftPair;
-		
-			Node x = value.getValue();
+			// * Make new Pair of variables and compiled Node *
+				Pair<ArrayList<String>, Node> newDefLeftPair;
+				Node valueNode = value.getValue();
+				//Compile for each variable
+				for(int i = variables.size() - 1; i >= 0 ; i--) {
+					valueNode = abstraction(valueNode, variables.get(i));
+				}
+				newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, valueNode);
 			
-			//Compile for each variable
-			for(int i = variables.size() - 1; i >= 0 ; i--) {
-				x = abstraction(x, variables.get(i));
-			}
-			
-			newDefLeftPair = new Pair<ArrayList<String>, Node>(variables, x);
 			newDefLeft.put(key, newDefLeftPair);
 		}
 		
-		Def x = new Def(newDefLeft.returnHashMap(), pDef.getExpr()); 
-		return x;
+		Def resultCompilerDef = new Def(newDefLeft, pDef.getExpr()); 
+		return resultCompilerDef;
 	}
 	
 	//Check if Node is a constant

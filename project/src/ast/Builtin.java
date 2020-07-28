@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for all Builtin Nodes. Contains Symbols and Keywords from Lexer.
+ */
+
 import visitors.Visitor;
 
 public class Builtin extends Node{
@@ -50,6 +54,8 @@ public class Builtin extends Node{
 		return v.visit(this);
 	}
 	
+	
+	// * Functions to check if a Node is a specific Builtin *
 	public static boolean isS(Node x) {
 		Builtin S = new Builtin(Builtin.funct.S);
 		return x.toString() == S.toString();

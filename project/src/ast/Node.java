@@ -1,5 +1,8 @@
 package ast;
 
+/*
+ * Abstract Class for all Nodes
+ */
 
 import visitors.Visitor;
 

@@ -1,10 +1,11 @@
 package ast;
 
-import java.util.HashMap;
-
 import visitors.Visitor;
+import parser.DefHashMap;
 
-import java.util.ArrayList;
+/*
+ * Class for Def Nodes
+ */
 
 public class Def extends Node{
 	
@@ -12,16 +13,21 @@ public class Def extends Node{
 	// hashmap(string, pair(list, node) kommentare
 	
 	private Node right;
-	private HashMap<String, Pair<ArrayList<String>, Node>> left;
+	private DefHashMap left;
 
-	public Def(HashMap<String, Pair<ArrayList<String>, Node>> left, Node right) {
+	public Def(DefHashMap left, Node right) {
 		this.left = left;
 		this.right = right;
 	}
 	
-	public HashMap<String, Pair<ArrayList<String>, Node>> getDefinitions() {
+	public DefHashMap getDefinitions() {
 		//return (HashMap<String, Pair<ArrayList<String>, Node>>) left.clone();
 		return left;
+	}
+	
+	public void updateDefinitions(DefHashMap left) {
+		//return (HashMap<String, Pair<ArrayList<String>, Node>>) left.clone();
+		this.left = left;
 	}
 	
 	public Node getExpr() {

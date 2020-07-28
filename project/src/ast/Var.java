@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for Variable Nodes
+ */
+
 import visitors.Visitor;
 
 public class Var extends Node{

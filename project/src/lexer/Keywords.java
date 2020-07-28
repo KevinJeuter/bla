@@ -1,5 +1,9 @@
 package lexer;
 
+/*
+ * Class for Keywords
+ */
+
 public class Keywords extends Token {
 	
 	private kw key;
@@ -22,6 +26,7 @@ public class Keywords extends Token {
 		key = toEnum(strKey);
 	}
 	
+	//Checks the whole list of Keywords if it contains the String "key"
 	public static boolean isKeyword(String key) {
 		for (kw k : kw.values()) {
 			if (k.toString().toLowerCase().equals(key.toLowerCase())) {

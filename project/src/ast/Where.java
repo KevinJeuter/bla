@@ -1,7 +1,10 @@
 package ast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+/*
+ * Class for Where Node
+ */
+
+import parser.DefHashMap;
 
 import visitors.Visitor;
 
@@ -9,14 +12,14 @@ public class Where extends Node{
 	
 	private Node right;
 
-	private HashMap<String, Pair<ArrayList<String>, Node>> left;
+	private DefHashMap left;
 
-	public Where(HashMap<String, Pair<ArrayList<String>, Node>> left, Node right) {
+	public Where(DefHashMap left, Node right) {
 		this.left = left;
 		this.right = right;
 	}
 
-	public HashMap<String, Pair<ArrayList<String>, Node>> getDefinitions() {
+	public DefHashMap getDefinitions() {
 		return left;
 	}
 	

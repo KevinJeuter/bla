@@ -2,6 +2,10 @@ package lexer;
 
 import java.util.ArrayList;
 
+/*
+ * Main Class of the Lexer. Creates an ArrayList of Tokens, to be used in other classes
+ */
+
 import lexer.Token;
 
 public class Lexer {
@@ -18,20 +22,20 @@ public class Lexer {
 		
 		for (;;) { // forever	
 
-			if (ptr == src.length()) { 
+			if (ptr == src.length()) { // Make an EOF Token at the end of the Program
 				lexSpecial();
 				break;
 			}
 
-			else if (isComment(src)) { // Comment. Also wird bis \n übersprungen, falls vorhanden
+			else if (isComment(src)) { // Comment. If there is a comment (||...) it skips everything until there is a new Line
 				skipComment(src);
 			}
 
-			else if (isEmptyLine(src.charAt(ptr)) || isTab(src.charAt(ptr))) {
+			else if (isEmptyLine(src.charAt(ptr)) || isTab(src.charAt(ptr))) { //If there is an Empty Line or a Tab, skip it
 				skipWhitespace();
 			}
 			
-			else if(isNewLine(src)) {
+			else if(isNewLine(src)) { //If there is a NewLine, skip it
 				//isNewLine ueberspringt auch newLines
 			}
 
@@ -49,10 +53,11 @@ public class Lexer {
 			}
 
 			else if (Symbols.isSymbol(src.charAt(ptr))) {
-				lexSymbol(src);
+				lexSymbol(src); 
 			}
 			
 			else if(src.charAt(ptr) == '[') {
+				// Not implemented, so don't allow lists with [ ... ]
 				throw new RuntimeException("Lists in the form of \"[x:y:z]\" are not implemented. Try \"(x:y:z:nil)\" instead.");
 			}
 
@@ -61,7 +66,8 @@ public class Lexer {
 			}
 
 		}
-		printTokenList();
+		
+		System.out.println(toString()); //Visualization
 		
 	}
 
@@ -88,7 +94,7 @@ public class Lexer {
 
 	}
 
-	private void lexConstString(String file) { // unsicher, da ich nicht wusste wie nachprüfen
+	private void lexConstString(String file) {
 
 		// continue with lexing until '"'
 		// -> end pointer
@@ -96,7 +102,10 @@ public class Lexer {
 
 		String token = "";
 
-
+		//Because we know the Character at the pointer is " (checked already in Lexer() for loop) we can set
+		//the first character of our String to " and then set the pointer to pointer+1
+		//Then lex until there is another " and make token out of it. If there is no other ", throw an Error.
+		
 		token = token + Character.toString('"');
 		ptr++;
 		for (int i = ptr; i < file.length(); i++) {
@@ -169,7 +178,9 @@ public class Lexer {
 				if (Symbols.isSymbol(file.charAt(ptr))) {
 					token = token + Character.toString(file.charAt(ptr));
 					ptr++;
-					if(!token.equals(Symbols.les) && !token.equals(Symbols.grt) && !token.equals(Symbols.not)) {	//Wenn es nicht mit <, >, ! anfängt, haben alle anderen Symbole nur Länge 1. Um z.b. x=(x+2) zu ermöglichen =( wäre kein Symbol sonst.
+					//All Symbols that don't start with <, >, ! are length 1. So here we check if it starts with one of those symbols.
+					//Otherwise the program would have problems with x=(x+2) as it would see =( as one Symbol.
+					if(!token.equals(Symbols.les) && !token.equals(Symbols.grt) && !token.equals(Symbols.not)) {
 						break;
 					}
 				} else {
@@ -243,7 +254,13 @@ public class Lexer {
 	}
 	
 	private boolean isComment(String file) {
-		return (ptr < file.length() && file.charAt(ptr) == '|' && file.charAt(ptr + 1) == '|');
+		//Check if Comment really starts with ||, otherwise throw Error
+		if((ptr == file.length()-1 && file.charAt(ptr) == '|') || (ptr < file.length()-1 && file.charAt(ptr) == '|' && file.charAt(ptr + 1) != '|')) {
+			throw new RuntimeException("Comments need to be written as ||...");
+		}
+		else {
+			return (ptr < file.length()-1 && file.charAt(ptr) == '|' && file.charAt(ptr + 1) == '|');
+		}
 	}
 	
 	private void skipComment(String file) {
@@ -257,14 +274,14 @@ public class Lexer {
 		}
 	}
 
-	private void printTokenList() { 	//toString
-		for (Token i : tokens) {
-			System.out.println(i);
-		}
+	@Override
+	public String toString() { 	//toString
+		return tokens.toString();
 	}
 	
 	public ArrayList<Token> getTokens() {
-		return tokens;
+		ArrayList<Token> tokensClone = (ArrayList<Token>) tokens.clone();
+		return tokensClone;
 	}
 	
 	public Token getLookahead() {

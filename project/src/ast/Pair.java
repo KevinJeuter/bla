@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for Pairs
+ */
+
 import java.util.Objects;
 
 //Klasse Pair mit Datentypen F, S. first und second sind die Werte.

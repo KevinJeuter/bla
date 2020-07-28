@@ -1,5 +1,9 @@
 package ast;
 
+/*
+ * Class for String Nodes
+ */
+
 import visitors.Visitor;
 
 public class StringConst extends Node{

@@ -18,6 +18,8 @@ import ast.Var;
 import parser.DefHashMap;
 
 class ParserTest {
+	
+	//Need to activate toString Code in At Class
 
 	@Test
 	void testParser1() {
@@ -46,7 +48,7 @@ class ParserTest {
 		At equPlus = new At(equ, plusAt1);
 		At equ42 = new At(equPlus, fourtytwo);
 				
-		Def testDef = new Def(testDefHash.returnHashMap(), equ42);
+		Def testDef = new Def(testDefHash, equ42);
 		
 		assertEquals(pDef.toString(), testDef.toString());
 	}

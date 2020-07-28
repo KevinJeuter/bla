@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import parser.DefHashMap;
 
 class CompilerTest {
+	
+	//Need to activate toString Code in At Class
 
 	@Test
 	void testCompiler() {
@@ -24,7 +26,7 @@ class CompilerTest {
 		Parser p = new Parser(l);
 		Def pDef = p.system();
 		Compiler c = new Compiler(pDef);
-		Def cDef = c.getResult();
+		Def cDef = c.getCompilerResult();
 
 		Builtin S = new Builtin(Builtin.funct.S);
 		Builtin K = new Builtin(Builtin.funct.K);
@@ -51,7 +53,7 @@ class CompilerTest {
 		
 		At allRightAt = new At(addTo41, one);
 		
-		Def testDef = new Def(testDefHashMap.returnHashMap(), allRightAt);
+		Def testDef = new Def(testDefHashMap, allRightAt);
 		
 		assertEquals(cDef.toString(), testDef.toString());
 	}

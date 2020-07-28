@@ -1,5 +1,9 @@
 package lexer;
 
+/*
+ * Class of all the Specials (For this project there is only EOF)
+ */
+
 public class Specials extends Token {
 	
 	private spcl special;

@@ -1,5 +1,9 @@
 package parser;
 
+/*
+ * Main Class for the Parser. Turn Tokens into Nodes.
+ */
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -30,6 +34,7 @@ public class Parser {
 		this.l = l;
 	}
 	
+	//Create all Tokens and Nodes necessary for the Program
 	private static Keywords tokenNil = new Keywords("nil");
 	private static Keywords tokenHd = new Keywords("hd");
 	private static Keywords tokenTl = new Keywords("tl");
@@ -76,14 +81,12 @@ public class Parser {
 	private static Node nodeMul = new Builtin(Builtin.funct.MUL);
 	private static Node nodeDiv = new Builtin(Builtin.funct.DIV);
 	
-	public static HashMap<String, Pair<ArrayList<String>, Node>> funcdefs = new HashMap<String, Pair<ArrayList<String>, Node>>();
-	
-	//Funktion zum überprüfen, ob Token_test gleich nächstes Token im Stream ist
+	//Check if the next Token is the same as the Token "test"
 	private boolean equalLookAhead(Token test) {
 		return l.getLookahead().toString().equals(test.toString());
 	}
 	
-	//Überprüfen, ob Token gleich und ein Token weiter gehen im Stream
+	//Same as equalLookAhead, but also move one Token forward
 	private Token match(Token t) {
 		Token x = l.getToken();
 		if (x.toString().equals(t.toString())) {
@@ -95,16 +98,18 @@ public class Parser {
 	}
 	
 	public Def system() {
-		//Wenn nächstes Token = Token_Def, mache neues Def aus funcdefs und expr
+		//Make a new Def Node, this will be the result of the Parser
 		if(equalLookAhead(def)) {
-			funcdefs = funcdefs().returnHashMap();
+			DefHashMap funcdefs = funcdefs();
 			match(dot);
 			Node expr = expr();
 			Def system = new Def(funcdefs, expr);
 			return system;
 		}
-		//Wenn nächstes token != Token_Def mache neues Def aus empty und expr
+		//If there is no "def" in the Program, make an empty Def node. This step is needed, because the 
+		//Visitor needs a specific Node. So system() has to be a Def Node, no matter what.
 		else {
+			DefHashMap funcdefs = new DefHashMap();
 			ArrayList<String> emptyList = new ArrayList<String>();
 			emptyList.add("empty");
 			StringConst emptyNode = new StringConst("empty");
@@ -116,13 +121,12 @@ public class Parser {
 	}
 	
 	private DefHashMap funcdefs() {
-		//Neue Hashmap für Def 
 		DefHashMap f = new DefHashMap();
 		return funcdefs1(f);
 	}
 	
 	private DefHashMap funcdefs1(DefHashMap f) {
-		//Fülle Hashmap mit def und gebe die Hashmap durch funcdefs1(f) aus
+		//If there is a def, fill it and repeat until there is no def left anymore. Then return the HashMap.
 		if(equalLookAhead(def)) {
 			match(def);
 			def(f);
@@ -134,9 +138,9 @@ public class Parser {
 	}
 	
 	private DefHashMap def(DefHashMap f) {
-		//Array var, um die Variablen zu speichern
+		//Array var, to save the Variables
 		ArrayList<String> var = new ArrayList<String>();
-		//Fülle Hashmap.
+		//Fill HashMap
 		f.put(name().toString(), abstraction(var));
 		return f;
 	}
@@ -144,12 +148,10 @@ public class Parser {
 	private Pair<ArrayList<String>, Node> abstraction(ArrayList<String> var) {
 		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
-			//Wenn ein =, dann gib das Pair von Variablen und expr aus
 			Pair<ArrayList<String>, Node> abst = new Pair<ArrayList<String>, Node>(var, expr());
 			return abst;
 		}
 		else {
-			//Füge die variablen zur liste var hinzu
 			var.add(name().toString());
 			return abstraction(var);
 		}	
@@ -170,10 +172,7 @@ public class Parser {
 		}
 	}
 	
-	//bei listen braucht man parameter
-	
 	private Node expr() {
-		//Wenn expr1 null ist, dann gib nur condExpr() aus, sonst mache ein At mit condExpr und expr
 		Node cond = condExpr();
 		Node exp1 = expr1();
 		if(exp1 == null) {
@@ -186,30 +185,28 @@ public class Parser {
 	}
 	
 	private Node expr1() {
-		//gib null aus, rest nicht implementiert
+		//Rest not implemented.
 		return null;
 	}
 
 	private Node listExpr() {
+		//If there is a ":".
 		Node opEx = opExpr();
 		Node listexp1 = listExpr1(opEx);
-		//Wenn listExpr1 leer ist, gib nunr opEx aus
 		if(listexp1 == null) {
 			return opEx;
 		}
 		else {
-		//Sonst gibt listexp1 aus
 			return listexp1;
 		}
 	}
 	
 	private Node listExpr1(Node expr) {
-		//Wenn ein : kommt, mache ein at von : und expr und dann ein at von dem vorherigen und listExpr, sonst kommt null raus.
 		if(equalLookAhead(tokenColon)) {
 			match(tokenColon);
 			At listExpr1At = new At(nodeColon, expr);
-			At y = new At(listExpr1At, listExpr());
-			return y;
+			At resultAt = new At(listExpr1At, listExpr());
+			return resultAt;
 		}
 		else {
 			return null;
@@ -217,7 +214,7 @@ public class Parser {
 	}
 	
 	private Node opExpr() {
-		//Wenn opExpr1 leer ist, gib nur con aus, sonst ein At von con und opExpr1
+		//If there is an "or".
 		Node con = conjunct();
 		Node opexp1 = opExpr1(con);
 		if(opexp1 == null) {
@@ -232,14 +229,15 @@ public class Parser {
 		//Wenn ein or kommt mache ein At von or und conjunct, wenn es kein weiteres or mehr gibt,
 		//also opExpr1 ist leer, gib nur dieses at aus. Sonst mache ein At aus dem letzten At und 
 		//der opExpr1 und gebe dieses aus.
+		//Funktioniert bei and, plus, minus,... gleich
 		if(equalLookAhead(tokenOr)) {
 			match(tokenOr);
 			Node con = conjunct();
 			Node opexp1 = opExpr1(con);
 			At opExpr1AtOr = new At(nodeOr, opExprCon);
 			if(opexp1 == null) {
-				At y = new At(opExpr1AtOr, con);
-				return y;
+				At resultAt = new At(opExpr1AtOr, con);
+				return resultAt;
 			}
 			else {
 				At opExpr1At = new At(opExpr1AtOr, opexp1);
@@ -252,7 +250,7 @@ public class Parser {
 	}
 	
 	private Node conjunct() {
-		//Wenn conjunct1 leer ist, gib nur compar aus. Sonst mache ein At aus compar und conjunct
+		//If there is an "and".
 		Node com = compar();
 		Node con1 = conjunct1(com);
 		if(con1 == null) {
@@ -264,18 +262,14 @@ public class Parser {
 	}
 	
 	private Node conjunct1(Node conCom) {
-		//Wenn das nächste token ein and ist, mache ein at aus and und compar.
-		//Wenn compar1 leer ist, gebe dieses at aus. Sonst mache ein neues at
-		//aus dem letzten at und conjunct1
-		//Wenn kein and kommt, gibt conjunct1 null aus
 		if(equalLookAhead(tokenAnd)) {
 			match(tokenAnd);
 			Node com = compar();
 			Node con1 = conjunct1(com);
 			At conjunct1AtAnd = new At(nodeAnd, conCom);
 			if(con1 == null) {
-				At y = new At(conjunct1AtAnd, com);
-				return y;
+				At resultAt = new At(conjunct1AtAnd, com);
+				return resultAt;
 			}
 			else {
 				At conjunct1At = new At(conjunct1AtAnd, con1);
@@ -288,7 +282,7 @@ public class Parser {
 	}
 	
 	private Node compar() {
-		//Wenn compar1 leer ist, gebe add aus. Sonst mache ein at aus add und compar1
+		//If there is a comparison Symbol
 		Node add = add();
 		Node comp1 = compar1(add);
 		if(comp1 == null) {
@@ -299,8 +293,29 @@ public class Parser {
 		}
 	}
 	
+	
+	private Node compar1(Node comAdd) {
+		if(isRelopToken()) {
+			Node relopNode = relop();
+			Node add = add();
+			Node comp1 = compar1(add);
+			At compar1RelopAt = new At(relopNode, comAdd);
+			if(comp1 == null) {
+				At resultAt = new At(compar1RelopAt, add);
+				return resultAt;
+			}
+			else {
+				At compar1At = new At(compar1RelopAt, comp1);
+				return compar1At;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	
 	private boolean isRelopToken() {
-		//Überprüfe, ob das nächste token ein relop ist.
+		//Check if next token is a comparison Symbol
 		if(equalLookAhead(tokenEqu)) {
 			return true;
 		}
@@ -324,31 +339,8 @@ public class Parser {
 		}
 	}
 	
-	private Node compar1(Node comAdd) {
-		//Wenn das nächste token ein relop ist, mache eine zugehörige node.
-		//Erstelle dann ein at von der Node und add. Wenn compar1 leer ist, gebe dieses at aus
-		//Sonst mache einn neues at mit dem letzten at und compar1
-		if(isRelopToken()) {
-			Node relopNode = relop();
-			Node add = add();
-			Node comp1 = compar1(add);
-			At compar1RelopAt = new At(relopNode, comAdd);
-			if(comp1 == null) {
-				At y = new At(compar1RelopAt, add);
-				return y;
-			}
-			else {
-				At compar1At = new At(compar1RelopAt, comp1);
-				return compar1At;
-			}
-		}
-		else {
-			return null;
-		}
-	}
-	
-	
 	private Node add() {
+		//If next token is a Plus or Minus
 		Node mul = mul();
 		Node add1 = add1(mul);
 		if(add1 == null) {
@@ -356,16 +348,6 @@ public class Parser {
 		}
 		else {
 			return add1;
-		}
-	}
-	
-	 private boolean isAddopToken() {
-		//Überprüfe, ob das nächste token ein addop ist.
-		if(equalLookAhead(tokenPlus) || equalLookAhead(tokenMinus)) {
-			return true;
-		}
-		else {
-			return false;
 		}
 	}
 	
@@ -388,9 +370,14 @@ public class Parser {
 			return null;
 		}
 	}
+	
+	 private boolean isAddopToken() {
+		//Check if next token is Plus or Minus
+		return equalLookAhead(tokenPlus) || equalLookAhead(tokenMinus);
+	}
 
 	private Node mul() {
-		//Wenn mul1 leer ist, gebe fac aus. Sonst mache ein at aus fac und mul1 und gebe dieses raus.
+		//If there is a * or /
 		Node fac = factor();
 		Node mul1 = mul1(fac);
 		if(mul1 == null) {
@@ -401,22 +388,7 @@ public class Parser {
 		}
 	}
 	
-	private boolean isMulopToken() {
-		//überprüfe ob das nächste token ein mulop ist.
-		if(equalLookAhead(tokenMul)) {
-			return true;
-		}
-		else if(equalLookAhead(tokenDiv)) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
 	private Node mul1(Node mulFac) {
-		//wenn das nächste token ein mulop ist, mache ein at aus mulopnode unnd fac. Wenn mul1 leer ist gebe
-		//diese aus. Sonst mache ein at aus dem letzten at und mul1
 		if(isMulopToken()) {
 			Node mulopNode = mulop();
 			Node fac = factor();
@@ -435,26 +407,19 @@ public class Parser {
 			return null;
 		}
 	}
+	
+	private boolean isMulopToken() {
+		//Check if next Token is * or /
+		return equalLookAhead(tokenMul) || equalLookAhead(tokenDiv);
+	}
 
 	private boolean isPrefixToken() {
-		//überprüfe ob das nächste token ein prefix ist
-		if(equalLookAhead(tokenMinus)) {
-			return true;
-		}
-		else if(equalLookAhead(tokenPlus)) {
-			return true;
-		}
-		else if(equalLookAhead(tokenNot)) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		//Check if next Token is a prefix
+		return equalLookAhead(tokenMinus) || equalLookAhead(tokenPlus) || equalLookAhead(tokenNot);
 	}
 	
 	private Node factor() {
-		//Wenn das nächste Token ein prefix ist, gebe ein at vonn prefixnode und comb zurück,
-		//Sonst gebe nur comb zurück
+		//If there is a Prefix.
 		if(isPrefixToken()) {
 			Node prefixNode = prefix();
 			Node comb = comb();
@@ -467,7 +432,7 @@ public class Parser {
 	}
 	
 	private Node comb() {
-		//Wenn comb1 leer ist, returne simple. Sonst mache ein at aus simple und comb1 und gebe dieses zurück.
+		//If there is another Id, Hd or Tl, Constant, Nil or "(".
 		Node simple = simple();
 		Node comb1 = comb1(simple);
 		if(comb1 == null) {
@@ -479,27 +444,27 @@ public class Parser {
 	}
 	
 	private boolean isIdClass() {
-		//Überprüfe, ob die Klasse des Tokens ein Identifier ist
+		//Check if Token is an Identifier
 		return l.getLookahead().getClass() == Identifier.class;
 	}
 	
 	private boolean isHdOrTl() {
-		//Überprüfe ob das token ein hd odder tl ist
+		//Check if Token is a Hd or Tl
 		return equalLookAhead(tokenHd) || equalLookAhead(tokenTl);
 	}
 	
 	private boolean isConstantClass() {
-		//Überprüfe ob die klasse des tokens constants ist
+		//Check if Token is a Constant
 		return l.getLookahead().getClass() == Constants.class;
 	}
 	
 	private boolean isParenl() {
-		//Überprüfe, ob das token ein ( ist.
+		//Check if Token is a "("
 		return equalLookAhead(tokenParenl);
 	}
 	
 	private boolean isNil() {
-		//Überprüfe, ob das token ein nil ist.
+		//Check if Token is a "nil"
 		return equalLookAhead(tokenNil);
 	}
 	
@@ -525,10 +490,6 @@ public class Parser {
 	}
 
 	private Node simple() {
-		//Wenn das token eine id ist, gebe name zurück.
-		//Wenn es ein hd oder tl ist, gebe builtin zurück.
-		//Wenn es eine konstante ist, gebe constant zurück.
-		//sonst, wenn es eine klammer auf, dann expr, dann klammer zu ist, gebe expr zurück.
 		if(isIdClass()) {
 			return name();
 		}
@@ -553,14 +514,14 @@ public class Parser {
 		}
 	}
 	
+	//Make a Node out of an ID Token
 	private Node name() {
-		//erstelle ein node var aus id() und gebe dieses zurück
 		Var name = new Var(id());
 		return name;
 	}
 	
+	//Make a Node out of Hd or Tl Token
 	private Node builtin() {
-		//wenn das token hd ist, matche es und gebe hd zurück, sonst matche auf tl und gebe tl zurück
 		if(equalLookAhead(tokenHd)) {
 			match(tokenHd);
 			return nodeHd;
@@ -577,32 +538,25 @@ public class Parser {
 	String checkBoolF = "<Constant boolean: false>";
 	String checkString = "<Constant string: [\"][\\x00-\\x7F]*[\"]>";
 	
+	// * Check if the Token is a valid Token. *
 	private boolean isId() {
-		//Überprüfe, ob es eine ID ist
 		return l.getLookahead().toString().matches(checkID);
 	}
 	
 	private boolean isNum() {
-		//Überprüfe, ob es eine num ist
 		return l.getLookahead().toString().matches(checkNumber);
 	}
 	
 	private boolean isBool() {
-		//Überprüfe, ob es ein bool ist
 		return l.getLookahead().toString().matches(checkBoolT) || l.getLookahead().toString().matches(checkBoolF);
 	}
 	
 	private boolean isString() {
-		//Überprüfe ob es ein string ist
 		return l.getLookahead().toString().matches(checkString);
 	}
 	
+	// * If Token is a valid Token make a fitting Const Node out of it *
 	private Node constant() {
-		//Wenn das token ein num ist, mache eine neue node aus num() und gebe es zurück
-		//Wenn das token ein bool ist, mache eine neue node aus bool() und gebe es zurück
-		//Wenn das token ein string ist, mache eine neue node aus string() und gebe es zurück
-		//Wenn das token ein nil ist, matche es auf nil und gebe es zurück
-		//sonst fehler.
 		if(isNum()) {
 			NumberConst num = new NumberConst(num());
 			return num;
@@ -618,7 +572,7 @@ public class Parser {
 			return str;
 		}
 		
-		else if(equalLookAhead(tokenNil)) {	//eigene klasse constNil
+		else if(equalLookAhead(tokenNil)) {
 			match(tokenNil);
 			return nodeNil;
 		}
@@ -628,8 +582,8 @@ public class Parser {
 		}
 	}
 	
+	// * Make Symbol Node out of Prefix Tokens *
 	private Node prefix() {
-		//Überprüfe, ob token - + oder not und matche und returne dann darauf. sonst fehler
 		if(equalLookAhead(tokenMinus)) {
 			match(tokenMinus);
 			return nodePreMinus;
@@ -647,8 +601,8 @@ public class Parser {
 		}
 	}
 	
+	// * Make Node out of "+" and "-" *
 	private Node addop() {
-		//überprüfe ob token - + matche darauf und gebe es aus. sonst fehler
 		if(equalLookAhead(tokenMinus)) {
 			match(tokenMinus);
 			return nodeMinus;
@@ -662,8 +616,8 @@ public class Parser {
 		}
 	}
 	
+	// * Make Node out of "*" and "/" *
 	private Node mulop() {
-		//überprüfe ob token * / matche darauf und gebe es aus. sonst fehler
 		if(equalLookAhead(tokenMul)) {
 			match(tokenMul);
 			return nodeMul;
@@ -677,8 +631,8 @@ public class Parser {
 		}
 	}
 	
+	// * Make Node out of Comparison Tokens *
 	private Node relop() {
-		//Überprüfe ob token = ~= >= <= > <, matche darauf und gebe es zurück, sonst fehler.
 		if(equalLookAhead(tokenEqu)) {
 			match(tokenEqu);
 			return nodeEqu;
@@ -708,8 +662,9 @@ public class Parser {
 		}
 	}
 	
+	//Return String of the Token only and go to the next Token
 	private String id() {
-		//führe getToken aus und returne den string.
+		//"<Id: ...>" has 5 Characters before "<Id: " and 1 after ">" the name of the Token.
 		if(isId()) {
 			Token id = l.getToken();
 			String onlyID = id.toString().substring(5, id.toString().length() - 1);
@@ -720,16 +675,16 @@ public class Parser {
 		}
 	}
 	
+	//Return int of the Token and go to the next Token
 	private int num() {
-		//führe getToken aus und returne die num.
 		Token numToken = l.getToken();
 		String onlyNum = numToken.toString().substring(15, numToken.toString().length() - 1);
 		int num = Integer.parseInt(onlyNum);
 		return num;
 	}
 	
+	//Return boolean of the Token and go to the next Token
 	private boolean bool() {
-		//führe getToken aus und returne das bool.
 		Token bool = l.getToken();
 		if(bool.toString().matches(checkBoolT)) {
 			return true;
@@ -739,8 +694,8 @@ public class Parser {
 		}
 	}
 	
+	//Return the string of the Token and go to the next Token
 	private String string() {
-		//führe getToken aus und returne den string.
 		Token string = l.getToken();
 		String onlyString = string.toString().substring(18, string.toString().length() - 1);
 		return onlyString;
